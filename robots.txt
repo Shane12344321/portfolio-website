@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://shane12344321.github.io/portfolio-website/sitemap.xml
