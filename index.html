@@ -100,7 +100,7 @@ a{color:inherit;text-decoration:none}
 section{position:relative}
 
 /* cursor */
-.cur,.cur-d{position:fixed;top:0;left:0;z-index:10000;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%)}
+.cur,.cur-d{position:fixed;top:0;left:0;z-index:9999999;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%)}
 .cur{width:42px;height:42px;border:1px solid var(--ink);transition:width .3s var(--ease),height .3s var(--ease),background .3s var(--ease),border-color .3s}
 .cur-d{width:6px;height:6px;background:var(--amber)}
 .cur.hov{width:78px;height:78px;background:var(--amber-wash);border-color:transparent;mix-blend-mode:normal}
@@ -353,9 +353,202 @@ section{position:relative}
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--amber);
 }
+
+/* Developer Gate CSS */
+html:not(.dev-gate-bypass) body {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+html:not(.dev-gate-bypass) .pre {
+  display: none !important;
+}
+
+.dev-gate-bypass #dev-gate-overlay {
+  display: none !important;
+}
+
+#dev-gate-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  background-color: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', 'Outfit', sans-serif;
+  color: var(--ink);
+}
+
+#dev-gate-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.dev-gate-content {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 520px;
+  text-align: center;
+  animation: devGateFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes devGateFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dev-gate-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 48px 40px;
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.dev-gate-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(224, 113, 10, 0.08);
+  border: 1px solid rgba(224, 113, 10, 0.2);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+
+.status-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: var(--amber);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 10px var(--amber);
+  animation: statusPulseAnim 2s infinite ease-in-out;
+}
+
+@keyframes statusPulseAnim {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.status-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+}
+
+.dev-gate-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.dev-gate-subtitle {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--amber-soft);
+  margin-bottom: 20px;
+}
+
+.dev-gate-desc {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 32px;
+  font-weight: 300;
+}
+
+.dev-gate-divider {
+  height: 1px;
+  background: radial-gradient(circle, rgba(224, 113, 10, 0.2) 0%, rgba(224, 113, 10, 0) 70%);
+  margin-bottom: 28px;
+}
+
+.dev-gate-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.dev-gate-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  transition: color 0.3s var(--ease), text-shadow 0.3s var(--ease);
+  text-decoration: none;
+}
+
+.dev-gate-links a:hover {
+  color: var(--amber);
+  text-shadow: 0 0 10px rgba(224, 113, 10, 0.3);
+}
 </style>
 </head>
 <body>
+<script>
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('preview') === 'true' || params.get('dev') === 'true') {
+      localStorage.setItem('portfolio_preview', 'true');
+    }
+    if (localStorage.getItem('portfolio_preview') === 'true') {
+      document.documentElement.classList.add('dev-gate-bypass');
+    }
+  })();
+</script>
+
+<div id="dev-gate-overlay">
+  <canvas id="dev-gate-canvas"></canvas>
+  <div class="dev-gate-content">
+    <div class="dev-gate-card">
+      <div class="dev-gate-status">
+        <span class="status-pulse"></span>
+        <span class="status-text">UNDER CONSTRUCTION</span>
+      </div>
+      <h1 class="dev-gate-title">Shane Sarosh</h1>
+      <p class="dev-gate-subtitle">Visit later</p>
+      <div class="dev-gate-divider"></div>
+      <div class="dev-gate-links">
+        <a href="https://github.com/Shane12344321" target="_blank" rel="noopener" data-cursor>GitHub ↗</a>
+        <a href="https://linkedin.com/in/shane-sarosh" target="_blank" rel="noopener" data-cursor>LinkedIn ↗</a>
+        <a href="mailto:shane.sarosh2024@vitstudent.ac.in" data-cursor>Email ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="grain"></div>
 <div class="cur"></div><div class="cur-d"></div>
 <div class="prog"></div>
@@ -644,6 +837,9 @@ section{position:relative}
 <script>
 /* preloader — terminal boot */
 (function(){
+  if (localStorage.getItem('portfolio_preview') !== 'true') {
+    return;
+  }
   var body=document.getElementById('preBody');
   var bar=document.getElementById('preBar'),pct=document.getElementById('prePct');
   var lines=[
@@ -741,6 +937,7 @@ addEventListener('scroll',function(){var y=scrollY;var h=document.querySelector(
 <script>
 /* three.js interactive 3D hero */
 (function(){
+  if (localStorage.getItem('portfolio_preview') !== 'true') return;
   if(!window.THREE)return;
   var canvas=document.getElementById('bg3d');if(!canvas)return;
   var scene=new THREE.Scene();
@@ -884,6 +1081,123 @@ addEventListener('scroll',function(){var y=scrollY;var h=document.querySelector(
 (function(){
   if(matchMedia('(hover:hover)').matches)return;
   document.querySelectorAll('.flip').forEach(function(f){f.addEventListener('click',function(e){if(e.target.closest('.flip__open'))return;e.preventDefault();f.classList.toggle('flipped');});});
+})();
+
+/* Developer Gate Canvas Particles */
+(function() {
+  if (localStorage.getItem('portfolio_preview') === 'true') return;
+
+  var canvas = document.getElementById('dev-gate-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var width, height;
+  var particles = [];
+  var mouse = { x: null, y: null, radius: 150 };
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  window.addEventListener('mousemove', function(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  window.addEventListener('mouseleave', function() {
+    mouse.x = null;
+    mouse.y = null;
+  });
+
+  function Particle() {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = (Math.random() - 0.5) * 0.4;
+    this.radius = Math.random() * 2 + 1;
+    var colors = [
+      'rgba(224, 113, 10, 0.6)',  // Amber
+      'rgba(244, 162, 60, 0.5)',  // Warm gold
+      'rgba(22, 19, 15, 0.2)'     // Faint dark (Ink)
+    ];
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  Particle.prototype.update = function() {
+    if (this.x < 0 || this.x > width) this.vx = -this.vx;
+    if (this.y < 0 || this.y > height) this.vy = -this.vy;
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (mouse.x !== null && mouse.y !== null) {
+      var dx = mouse.x - this.x;
+      var dy = mouse.y - this.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < mouse.radius) {
+        var force = (mouse.radius - dist) / mouse.radius;
+        this.x += (dx / dist) * force * 0.8;
+        this.y += (dy / dist) * force * 0.8;
+      }
+    }
+  };
+
+  Particle.prototype.draw = function() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  };
+
+  var count = Math.min(120, Math.floor((width * height) / 10000));
+  for (var i = 0; i < count; i++) {
+    particles.push(new Particle());
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, width, height);
+
+    var gradient = ctx.createRadialGradient(
+      width / 2, height / 2, 0,
+      width / 2, height / 2, Math.max(width, height)
+    );
+    gradient.addColorStop(0, '#fbfaf6');
+    gradient.addColorStop(1, '#f4f1ea');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.update();
+      p.draw();
+    }
+
+    for (var i = 0; i < particles.length; i++) {
+      for (var j = i + 1; j < particles.length; j++) {
+        var p1 = particles[i];
+        var p2 = particles[j];
+        var dx = p1.x - p2.x;
+        var dy = p1.y - p2.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          var alpha = (100 - dist) / 100 * 0.15;
+          ctx.strokeStyle = 'rgba(224, 113, 10, ' + alpha + ')';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+  loop();
 })();
 </script>
 </body>
