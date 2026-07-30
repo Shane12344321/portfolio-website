@@ -129,6 +129,30 @@ h1 em {
   margin-bottom: clamp(48px, 9vw, 96px);
 }
 
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: clamp(48px, 9vw, 96px);
+}
+
+.contact-links a {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.contact-links a:hover {
+  border-color: rgba(224, 113, 10, .45);
+  background: #fff;
+  color: var(--amber);
+}
+
 .project {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -240,6 +264,13 @@ h1 em {
         </span>
         <span class="arrow" aria-hidden="true">↗</span>
       </a>
+    </section>
+
+    <section class="contact-links" aria-label="Contact links">
+      <a href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+      <a href="https://github.com/Shane12344321" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="https://www.linkedin.com/in/shanesarosh" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a href="mailto:shanesarosh@gmail.com">Email ↗</a>
     </section>
 
     <footer class="foot">shanesarosh.xyz/motorq</footer>
