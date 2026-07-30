@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Motorq Projects | Shane Sarosh</title>
+<meta name="title" content="Motorq Projects | Shane Sarosh" />
+<meta name="description" content="A focused collection of Shane Sarosh's project links for Motorq." />
+<meta name="author" content="Shane Sarosh" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://shanesarosh.xyz/motorq/" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shanesarosh.xyz/motorq/" />
+<meta property="og:title" content="Motorq Projects | Shane Sarosh" />
+<meta property="og:description" content="A focused collection of Shane Sarosh's project links for Motorq." />
+<meta property="og:image" content="https://shanesarosh.xyz/og-image.png" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="https://shanesarosh.xyz/motorq/" />
+<meta property="twitter:title" content="Motorq Projects | Shane Sarosh" />
+<meta property="twitter:description" content="A focused collection of Shane Sarosh's project links for Motorq." />
+<meta property="twitter:image" content="https://shanesarosh.xyz/og-image.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #f4f1ea;
+  --paper: #fbfaf6;
+  --ink: #16130f;
+  --ink-soft: #5a544a;
+  --line: rgba(22, 19, 15, .14);
+  --amber: #e0710a;
+  --amber-wash: rgba(224, 113, 10, .10);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page {
+  width: min(980px, calc(100% - 40px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(32px, 7vw, 76px) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: clamp(72px, 14vw, 150px);
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.home {
+  color: var(--ink-soft);
+  transition: color .2s ease;
+}
+
+.home:hover {
+  color: var(--ink);
+}
+
+.label {
+  color: var(--amber);
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: .12em;
+}
+
+.hero {
+  margin-bottom: clamp(44px, 8vw, 76px);
+}
+
+h1 {
+  max-width: 780px;
+  font-family: "Fraunces", serif;
+  font-size: clamp(52px, 10vw, 112px);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: .95;
+}
+
+h1 em {
+  color: var(--amber);
+  font-style: italic;
+}
+
+.intro {
+  max-width: 620px;
+  margin-top: 26px;
+  color: var(--ink-soft);
+  font-size: clamp(17px, 2.5vw, 21px);
+}
+
+.links {
+  display: grid;
+  gap: 14px;
+  margin-bottom: clamp(48px, 9vw, 96px);
+}
+
+.project {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 112px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.project:hover {
+  transform: translateY(-3px);
+  border-color: rgba(224, 113, 10, .45);
+  background: #fff;
+}
+
+.project h2 {
+  font-family: "Fraunces", serif;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.url {
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.arrow {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--amber);
+  font-size: 23px;
+  line-height: 1;
+}
+
+.foot {
+  margin-top: auto;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 70px;
+  }
+
+  .project {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 24px;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+  }
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="topbar" aria-label="Page navigation">
+      <a class="home" href="/">Shane Sarosh</a>
+      <span class="label">Motorq / Project Links</span>
+    </nav>
+
+    <section class="hero" aria-labelledby="page-title">
+      <h1 id="page-title">Selected <em>projects</em> for Motorq</h1>
+      <p class="intro">A short list of applied AI, developer tooling, and race strategy projects with direct links to their GitHub repositories.</p>
+    </section>
+
+    <section class="links" aria-label="Project links">
+      <a class="project" href="https://github.com/Shane12344321/clinic_v2" target="_blank" rel="noopener noreferrer">
+        <span>
+          <h2>Clinical Trial Eligibility Matcher</h2>
+          <span class="url">github.com/Shane12344321/clinic_v2</span>
+        </span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="project" href="https://github.com/Shane12344321/NoteForge" target="_blank" rel="noopener noreferrer">
+        <span>
+          <h2>NoteForge</h2>
+          <span class="url">github.com/Shane12344321/NoteForge</span>
+        </span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="project" href="https://github.com/Shane12344321/f1-ai-race-engineer" target="_blank" rel="noopener noreferrer">
+        <span>
+          <h2>F1 AI Race Engineer</h2>
+          <span class="url">github.com/Shane12344321/f1-ai-race-engineer</span>
+        </span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+    </section>
+
+    <footer class="foot">shanesarosh.xyz/motorq</footer>
+  </main>
+</body>
+</html>
