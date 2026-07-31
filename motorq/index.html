@@ -52,6 +52,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
   opacity: .05;
   mix-blend-mode: multiply;
@@ -63,7 +64,33 @@ a {
   text-decoration: none;
 }
 
+.magnet-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  pointer-events: none;
+  opacity: .34;
+  /* thins the field out behind the headline and copy so it never fights the text */
+  -webkit-mask-image: radial-gradient(ellipse 60% 52% at 50% 42%, rgba(0, 0, 0, .16), #000 78%);
+  mask-image: radial-gradient(ellipse 60% 52% at 50% 42%, rgba(0, 0, 0, .16), #000 78%);
+}
+
+.magnet-field span {
+  display: block;
+  width: 2px;
+  height: 22px;
+  border-radius: 2px;
+  background: var(--ink);
+  transform: rotate(-10deg);
+  transform-origin: center;
+}
+
 .page {
+  position: relative;
+  z-index: 1;
   width: min(980px, calc(100% - 40px));
   min-height: 100vh;
   margin: 0 auto;
@@ -225,10 +252,20 @@ h1 em {
     width: 40px;
     height: 40px;
   }
+
+  .magnet-field {
+    opacity: .26;
+  }
+
+  .magnet-field span {
+    height: 18px;
+  }
 }
 </style>
 </head>
 <body>
+  <div class="magnet-field" id="magnetField" aria-hidden="true"></div>
+
   <main class="page">
     <nav class="topbar" aria-label="Page navigation">
       <a class="home" href="/">Shane Sarosh</a>
@@ -275,5 +312,110 @@ h1 em {
 
     <footer class="foot">shanesarosh.xyz/motorq</footer>
   </main>
+
+<script>
+(function () {
+  var field = document.getElementById("magnetField");
+  if (!field) return;
+
+  var CELL = 54;          // grid pitch in px — the pattern tiles across the whole viewport
+  var BASE_ANGLE = -10;   // resting angle before any pointer input
+  var IDLE_MS = 1800;     // how long after the last pointer move the ambient sweep takes back over
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var items = [];
+  var cx = [];            // cached line centers, refreshed on resize only
+  var cy = [];
+  var last = [];
+  var vw = 0, vh = 0, cols = 0, rows = 0;
+
+  function build() {
+    vw = window.innerWidth;
+    vh = window.innerHeight;
+
+    var c = Math.ceil(vw / CELL) + 1;
+    var r = Math.ceil(vh / CELL) + 1;
+
+    // Only touch the DOM when the grid actually changes shape — a phone hiding its
+    // URL bar fires resize constantly, and re-measuring is enough for those.
+    if (c !== cols || r !== rows) {
+      cols = c;
+      rows = r;
+
+      field.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)";
+      field.style.gridTemplateRows = "repeat(" + rows + ", 1fr)";
+
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < rows * cols; i++) frag.appendChild(document.createElement("span"));
+      field.textContent = "";
+      field.appendChild(frag);
+
+      items = field.children;
+      cx = new Float32Array(items.length);
+      cy = new Float32Array(items.length);
+      last = new Float32Array(items.length).fill(BASE_ANGLE);
+    }
+
+    var cw = vw / cols, ch = vh / rows;
+    for (var j = 0; j < items.length; j++) {
+      cx[j] = (j % cols + 0.5) * cw;
+      cy[j] = (Math.floor(j / cols) + 0.5) * ch;
+    }
+  }
+
+  // Same rotation math as the source component: every line points at the target.
+  function aim(px, py) {
+    for (var i = 0; i < items.length; i++) {
+      var r = Math.atan2(py - cy[i], px - cx[i]) * 180 / Math.PI;
+      if (Math.abs(r - last[i]) < 0.4) continue;
+      last[i] = r;
+      items[i].style.transform = "rotate(" + r + "deg)";
+    }
+  }
+
+  var mx = 0, my = 0, weight = 0, lastMove = -Infinity;
+
+  window.addEventListener("pointermove", function (e) {
+    mx = e.clientX;
+    my = e.clientY;
+    lastMove = performance.now();
+  }, { passive: true });
+
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      build();
+      if (reduced) aim(vw / 2, -vh);
+    }, 150);
+  });
+
+  build();
+
+  if (reduced) {
+    aim(vw / 2, -vh);
+    return;
+  }
+
+  // Endless ambient sweep: a virtual pointer on two out-of-phase orbits, so the
+  // field keeps turning forever and never repeats the same frame back to back.
+  var frame = 0;
+  aim(vw / 2 + vw * 0.62, vh / 2); // settle the first paint on the ambient start point
+
+  (function loop(now) {
+    requestAnimationFrame(loop);
+    if (frame++ % 2) return; // ~30fps is plenty for this; rAF already pauses in background tabs
+
+    var t = now / 1000;
+    var ax = vw / 2 + Math.cos(t * 2 * Math.PI / 26) * vw * 0.62;
+    var ay = vh / 2 + Math.sin(t * 2 * Math.PI / 19) * vh * 0.62;
+
+    var target = now - lastMove < IDLE_MS ? 1 : 0;
+    weight += (target - weight) * 0.05;
+
+    aim(ax + (mx - ax) * weight, ay + (my - ay) * weight);
+  })(performance.now());
+})();
+</script>
 </body>
 </html>
