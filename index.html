@@ -74,6 +74,8 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
 
 .carousel-card-main>*{min-width:0}
 /* Mobile profile links stay visible and thumb-friendly without crowding the desktop header. */
+.hero-actions #resume-link{order:1}
+.hero-actions .button.primary{order:2}
 .mobile-profile-links{display:none}
 @media(max-width:700px){
   .mobile-profile-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
@@ -185,6 +187,7 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
 (function(){
 'use strict';
 const root=document.documentElement, reduced=matchMedia('(prefers-reduced-motion: reduce)'),fine=matchMedia('(hover: hover) and (pointer: fine)');
+const heroActions=document.querySelector('.hero-actions'),resumeLink=document.getElementById('resume-link');if(heroActions&&resumeLink)heroActions.prepend(resumeLink);
 const themeButton=document.getElementById('theme-toggle'), motionButton=document.getElementById('motion-toggle'),motionLabel=document.getElementById('motion-label');
 let wanted=true;try{wanted=localStorage.getItem('shane-portfolio-effects')!=='off'}catch(_){}
 let motion=false,activeAnimations=new Set();
