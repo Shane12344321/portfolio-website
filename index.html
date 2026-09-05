@@ -76,6 +76,8 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
 /* Mobile profile links stay visible and thumb-friendly without crowding the desktop header. */
 .hero-actions #resume-link{order:1}
 .hero-actions .button.primary:not(#resume-link){order:2}
+.ambient-flow{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+[data-motion="off"] .ambient-flow{display:none}
 .hero-scene.profile-card{padding:18px}
 .profile-identity{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:14px;margin:18px 0}
 .profile-monogram{width:62px;height:62px;display:grid;place-items:center;border:1px solid var(--screen-line);border-radius:3px;background:rgba(212,226,183,.06);color:var(--phosphor);font:600 24px/1 var(--mono)}
@@ -105,6 +107,7 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
   @keyframes carousel-arrow-nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
   @keyframes carousel-arrow-spotlight{0%,100%{opacity:0;transform:scale(.88)}45%,65%{opacity:1;transform:scale(1)}}
 }
+@media(prefers-reduced-motion:reduce){.ambient-flow{display:none!important}}
 </style>
 </head>
 <body id="top">
@@ -119,7 +122,6 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
 <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.3-4.3-2.3-6-2.8M15 22v-3.4a3 3 0 0 0-.8-2.3c2.7-.3 5.5-1.3 5.5-6A4.7 4.7 0 0 0 18.4 7a4.3 4.3 0 0 0-.1-3.3S17.2 3.4 15 5a11.4 11.4 0 0 0-6 0C6.8 3.4 5.7 3.7 5.7 3.7A4.3 4.3 0 0 0 5.6 7a4.7 4.7 0 0 0-1.3 3.3c0 4.7 2.8 5.7 5.5 6A3 3 0 0 0 9 18.6V22"/></symbol>
 <symbol id="i-linkedin" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7m0-10v.5M11 17v-7m0 3a3 3 0 0 1 6 0v4"/></symbol>
 </defs></svg>
-<canvas id="pointer-grid" class="pointer-grid" aria-hidden="true"></canvas>
 <div class="pixel-cursor" id="pixel-cursor" aria-hidden="true"><span></span></div>
 <header class="topbar">
   <div class="header-inner wrap">
@@ -134,6 +136,7 @@ main,.topbar,.site-footer{position:relative}.topbar{position:sticky}.pointer-gri
 </header>
 <main id="main" class="wrap">
   <section class="hero" id="intro" aria-labelledby="hero-heading">
+    <canvas class="ambient-flow" id="ambient-flow" aria-hidden="true"></canvas>
     <div class="hero-grid">
       <div class="hero-text">
         <p class="intro-label eyebrow entrance"><span class="dot" aria-hidden="true"></span>Shane Sarosh / AI &amp; interpretability</p>
@@ -217,10 +220,18 @@ function syncTheme(){const dark=root.dataset.theme==='dark';themeButton.setAttri
 syncTheme();themeButton.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';store('shane-portfolio-theme',root.dataset.theme);syncTheme()});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',event=>{let saved;try{saved=localStorage.getItem('shane-portfolio-theme')}catch(_){}if(!saved){root.dataset.theme=event.matches?'dark':'light';syncTheme()}});
 /* Single-source motion preference. It covers CSS, entrances, canvas and pointer. */
-function syncMotion(){motion=wanted&&!reduced.matches;root.dataset.motion=motion?'on':'off';motionButton.setAttribute('aria-pressed',String(motion));motionButton.disabled=reduced.matches;motionButton.setAttribute('aria-label',reduced.matches?'Decorative motion disabled by your system preference':'Turn '+(motion?'off':'on')+' decorative effects');motionLabel.textContent=reduced.matches?'Motion reduced':'Effects: '+(motion?'on':'off');if(!motion){activeAnimations.forEach(a=>a.cancel());clearPointer()}updateScroll();drawSignal(performance.now());startSignal();}
+function syncMotion(){motion=wanted&&!reduced.matches;root.dataset.motion=motion?'on':'off';motionButton.setAttribute('aria-pressed',String(motion));motionButton.disabled=reduced.matches;motionButton.setAttribute('aria-label',reduced.matches?'Decorative motion disabled by your system preference':'Turn '+(motion?'off':'on')+' decorative effects');motionLabel.textContent=reduced.matches?'Motion reduced':'Effects: '+(motion?'on':'off');if(!motion){activeAnimations.forEach(a=>a.cancel());clearPointer()}updateScroll();drawSignal(performance.now());startSignal();startAmbient();}
 motionButton.addEventListener('click',()=>{wanted=!wanted;store('shane-portfolio-effects',wanted?'on':'off');syncMotion()});reduced.addEventListener('change',syncMotion);
 /* Native anchors, plus a small progress line and current-section indicator. */
 const hero=document.getElementById('intro'), scene=document.getElementById('hero-scene'),work=document.getElementById('work'),contact=document.getElementById('contact');
+const ambientCanvas=document.getElementById('ambient-flow'),ambientContext=ambientCanvas.getContext('2d');
+let aw=0,ah=0,ambientFrame=0,ambientVisible=true,lastAmbient=0,ambientPixels=[];
+function seedAmbient(){const streams=7,count=innerWidth<=700?42:84;ambientPixels=Array.from({length:count},(_,i)=>{const stream=i%streams,slot=Math.floor(i/streams),slots=Math.ceil(count/streams);return{x:(slot+(stream*.37)%1)*aw/slots,baseY:ah*(.16+stream/(streams-1)*.68),speed:.018+(i%5)*.005,phase:stream*.74+i*.19,size:i%6===0?5:3}})}
+function sizeAmbient(){const r=hero.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,1.5);aw=Math.max(1,r.width);ah=Math.max(1,r.height);ambientCanvas.width=Math.round(aw*dpr);ambientCanvas.height=Math.round(ah*dpr);ambientContext.setTransform(dpr,0,0,dpr,0,0);seedAmbient();drawAmbient(performance.now())}
+function drawAmbient(now){if(!ambientContext)return;const dt=Math.min(50,now-(lastAmbient||now-16)),t=now*.00024;lastAmbient=now;ambientContext.clearRect(0,0,aw,ah);const rgb=root.dataset.theme==='dark'?'192,212,165':'53,86,61';for(const p of ambientPixels){p.x+=p.speed*dt;if(p.x>aw+12)p.x=-12;const wave=Math.sin(p.x*.009+p.phase+t*4.1)*13+Math.sin(t*2+p.phase*.7)*7,y=p.baseY+wave,breathe=.5+.5*Math.sin(t*2.6+p.phase),alpha=.016+.042*breathe;ambientContext.fillStyle='rgba('+rgb+','+alpha.toFixed(3)+')';ambientContext.fillRect(Math.round(p.x/8)*8,Math.round(y/8)*8,p.size,p.size)}}
+function ambientLoop(now){ambientFrame=0;if(!motion||!ambientVisible||document.hidden)return;if(now-lastAmbient>28)drawAmbient(now);ambientFrame=requestAnimationFrame(ambientLoop)}
+function startAmbient(){if(ambientFrame)cancelAnimationFrame(ambientFrame);ambientFrame=0;if(!motion){if(ambientContext)ambientContext.clearRect(0,0,aw,ah);return}if(ambientVisible&&!document.hidden)ambientFrame=requestAnimationFrame(ambientLoop)}
+if('IntersectionObserver'in window)new IntersectionObserver(entries=>{ambientVisible=entries[0].isIntersecting;startAmbient()},{rootMargin:'80px'}).observe(hero);
 let scrollQueued=false,scrollPhase=0;
 function updateScroll(){scrollQueued=false;const max=Math.max(1,document.documentElement.scrollHeight-innerHeight),progress=Math.min(1,Math.max(0,scrollY/max));root.style.setProperty('--page-progress',progress.toFixed(4));const hr=hero.getBoundingClientRect();scrollPhase=Math.max(0,Math.min(1,-hr.top/Math.max(1,hr.height)));scene.style.setProperty('--scene-offset',(motion&&innerWidth>700?scrollPhase*24:0).toFixed(2)+'px');const section=contact.getBoundingClientRect().top<innerHeight*.6?'#contact':work.getBoundingClientRect().top<innerHeight*.6?'#work':null;document.querySelectorAll('.nav-link').forEach(a=>{if(a.getAttribute('href')===section)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});if(!signalFrame)drawSignal(performance.now());}
 window.addEventListener('scroll',()=>{if(!scrollQueued){scrollQueued=true;requestAnimationFrame(updateScroll)}},{passive:true});
@@ -235,24 +246,21 @@ function signalLoop(now){signalFrame=0;if(!motion||!fine.matches||!signalVisible
 function startSignal(){if(signalFrame){cancelAnimationFrame(signalFrame);signalFrame=0}if(motion&&fine.matches&&signalVisible&&!document.hidden)signalFrame=requestAnimationFrame(signalLoop)}
 scene.addEventListener('pointermove',e=>{if(!motion||e.pointerType==='touch')return;const r=scene.getBoundingClientRect();targetPX=(e.clientX-r.left)/r.width-.5;targetPY=(e.clientY-r.top)/r.height-.5},{passive:true});scene.addEventListener('pointerleave',()=>{targetPX=0;targetPY=0},{passive:true});
 if('IntersectionObserver'in window)new IntersectionObserver(entries=>{signalVisible=entries[0].isIntersecting;startSignal()},{rootMargin:'80px'}).observe(scene);
-/* Contribution-style pointer trail; no tracking, no invented contribution stats. */
-const trail=document.getElementById('pointer-grid'),tc=trail.getContext('2d'),marker=document.getElementById('pixel-cursor');
-let tw=innerWidth,th=innerHeight,trailFrame=0,inside=false,mx=0,my=0,fx=0,fy=0,lastMove=-10000,lastTrail=0,particleSequence=0,trailParticles=[];
-const maxTrailParticles=120,trailLife=1050;
-function clearPointer(){if(trailFrame)cancelAnimationFrame(trailFrame);trailFrame=0;trailParticles.length=0;if(tc)tc.clearRect(0,0,tw,th);inside=false;root.classList.remove('cursor-ready');marker.classList.remove('is-visible','is-link','is-pressed')}
-function sizeTrail(){tw=innerWidth;th=innerHeight;const dpr=Math.min(devicePixelRatio||1,2);trail.width=Math.round(tw*dpr);trail.height=Math.round(th*dpr);if(tc)tc.setTransform(dpr,0,0,dpr,0,0);clearPointer()}
-function spawnTrail(x0,y0,x1,y1){const dx=x1-x0,dy=y1-y0,distance=Math.hypot(dx,dy);if(distance<1)return;const steps=Math.min(6,Math.max(1,Math.ceil(distance/13))),nx=-dy/distance,ny=dx/distance;for(let i=1;i<=steps;i++){const t=i/steps,lane=((particleSequence%3)-1)*5,phase=particleSequence++*.91;trailParticles.push({x:x0+dx*t+nx*lane,y:y0+dy*t+ny*lane,vx:-dx*.026+nx*Math.sin(phase)*.16,vy:-dy*.026+ny*Math.cos(phase)*.16,age:0,phase,size:particleSequence%4===0?5:3})}if(trailParticles.length>maxTrailParticles)trailParticles.splice(0,trailParticles.length-maxTrailParticles)}
-function drawTrail(now){trailFrame=0;if(!tc||!motion||!fine.matches)return;const dt=Math.min(34,now-(lastTrail||now-16));lastTrail=now;const ease=1-Math.exp(-dt/72);fx+=(mx-fx)*ease;fy+=(my-fy)*ease;tc.clearRect(0,0,tw,th);const rgb=root.dataset.theme==='dark'?'192,212,165':'53,86,61',next=[];for(const p of trailParticles){p.age+=dt;if(p.age>=trailLife)continue;const life=1-p.age/trailLife,drift=p.age*.006+p.phase;p.vx*=Math.pow(.984,dt/16);p.vy*=Math.pow(.984,dt/16);p.x+=p.vx*dt/16+Math.sin(drift)*.14;p.y+=p.vy*dt/16+Math.cos(drift*.83)*.14;const x=Math.round(p.x/7)*7,y=Math.round(p.y/7)*7,alpha=.105*Math.pow(life,1.55);tc.fillStyle='rgba('+rgb+','+alpha.toFixed(3)+')';tc.fillRect(x,y,p.size,p.size);next.push(p)}trailParticles=next;if(trailParticles.length||now-lastMove<80)trailFrame=requestAnimationFrame(drawTrail)}
-document.addEventListener('pointermove',e=>{if(!motion||!fine.matches||!tc||e.pointerType==='touch')return;if(e.clientX<16||e.clientX>document.documentElement.clientWidth-16||e.clientY<16||e.clientY>innerHeight-16){clearPointer();return}const target=e.target instanceof Element?e.target:null;if(!target)return;const wasInside=inside,oldX=mx,oldY=my;mx=e.clientX;my=e.clientY;if(!wasInside){fx=mx;fy=my;lastTrail=0}else spawnTrail(oldX,oldY,mx,my);inside=true;root.classList.add('cursor-ready');const link=target.closest('a,button,summary,[role="button"]'),native=target.closest('input,textarea,select,[contenteditable="true"]'),text=!link&&target.closest('p,h1,h2,h3,h4,.stack,.eyebrow');marker.classList.toggle('is-visible',!native&&!text);marker.classList.toggle('is-link',!!link);marker.style.transform='translate3d('+(mx-7)+'px,'+(my-7)+'px,0)';lastMove=performance.now();if(!trailFrame)trailFrame=requestAnimationFrame(drawTrail)},{passive:true});
+/* Minimal custom pointer. The ambient pixel field above moves independently. */
+const marker=document.getElementById('pixel-cursor');
+let inside=false,mx=0,my=0;
+function clearPointer(){inside=false;root.classList.remove('cursor-ready');marker.classList.remove('is-visible','is-link','is-pressed')}
+function sizeTrail(){clearPointer()}
+document.addEventListener('pointermove',e=>{if(!motion||!fine.matches||e.pointerType==='touch')return;if(e.clientX<16||e.clientX>document.documentElement.clientWidth-16||e.clientY<16||e.clientY>innerHeight-16){clearPointer();return}const target=e.target instanceof Element?e.target:null;if(!target)return;mx=e.clientX;my=e.clientY;inside=true;root.classList.add('cursor-ready');const link=target.closest('a,button,summary,[role="button"]'),native=target.closest('input,textarea,select,[contenteditable="true"]'),text=!link&&target.closest('p,h1,h2,h3,h4,.stack,.eyebrow');marker.classList.toggle('is-visible',!native&&!text);marker.classList.toggle('is-link',!!link);marker.style.transform='translate3d('+(mx-7)+'px,'+(my-7)+'px,0)'},{passive:true});
 document.addEventListener('pointerdown',e=>{if(motion&&e.pointerType!=='touch')marker.classList.add('is-pressed')},{passive:true});document.addEventListener('pointerup',()=>marker.classList.remove('is-pressed'),{passive:true});document.addEventListener('pointerout',e=>{if(!e.relatedTarget)clearPointer()},{passive:true});document.addEventListener('keydown',e=>{if(e.key==='Tab'||e.key==='Escape')clearPointer()});document.addEventListener('contextmenu',clearPointer);window.addEventListener('blur',clearPointer);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPointer();startSignal()});fine.addEventListener('change',()=>{clearPointer();drawSignal(performance.now());startSignal()});
-window.addEventListener('resize',()=>{sizeSignal();sizeTrail();updateScroll()},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearPointer();startSignal();startAmbient()});fine.addEventListener('change',()=>{clearPointer();drawSignal(performance.now());startSignal()});
+window.addEventListener('resize',()=>{sizeSignal();sizeAmbient();sizeTrail();updateScroll()},{passive:true});
 /* Entrances never gate content: without JS, motion, or observers everything shows. */
 function entrance(){document.querySelectorAll('.entrance').forEach((el,index)=>animate(el,[{opacity:0,transform:'translateY(18px)'},{opacity:1,transform:'translateY(0)'}],{duration:680,delay:Math.min(index*65,390),easing:'cubic-bezier(.2,.8,.2,1)'}))}
 if('IntersectionObserver'in window){const seen=new WeakSet();const reveal=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting&&!seen.has(entry.target)){seen.add(entry.target);animate(entry.target,[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});reveal.unobserve(entry.target)}})},{threshold:.08});document.querySelectorAll('.reveal').forEach(el=>reveal.observe(el))}
 /* Real contact actions and the original embedded résumé. */
 let statusTimer;const status=document.getElementById('copy-status');document.getElementById('copy-email').addEventListener('click',async function(){const email='shanesarosh@gmail.com';let copied=false;try{if(navigator.clipboard&&isSecureContext){await navigator.clipboard.writeText(email);copied=true}}catch(_){}if(!copied){const field=document.createElement('textarea');field.value=email;field.setAttribute('readonly','');field.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';document.body.appendChild(field);field.select();try{copied=document.execCommand('copy')}catch(_){}field.remove();this.focus({preventScroll:true})}clearTimeout(statusTimer);status.textContent=copied?'Email address copied.':'Please select and copy the email address above.';statusTimer=setTimeout(()=>status.textContent='',5000)});
-sizeSignal();sizeTrail();syncMotion();requestAnimationFrame(entrance);
+sizeSignal();sizeAmbient();sizeTrail();syncMotion();requestAnimationFrame(entrance);
 })();
 </script>
 <dialog id="project-notes-dialog" class="notes-modal" aria-labelledby="notes-title"><div class="notes-header"><div><p class="notes-kind" id="notes-kind">Project notes</p><h2 class="notes-title" id="notes-title">Project notes</h2></div><button class="notes-close" id="notes-close" type="button" aria-label="Close project notes" autofocus><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="notes-body" id="notes-body"></div></dialog>
