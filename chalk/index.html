@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHALK — The tutor that talks while it draws</title>
+<meta name="description" content="CHALK is a voice-first AI math and physics tutor that teaches on a living whiteboard — sketching as it explains, stopping the moment a student jumps in.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='6' fill='%231d2320'/%3E%3Cpath d='M8 20 Q16 8 24 19' stroke='%23f4f3ee' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='19' r='2' fill='%23f2d06b'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --ink:#2C2C2B; --ink-2:#7D7A75; --canvas:#FFFFFF; --soft:#F9F8F7; --soft-2:#F0EFED;
+    --border:#E6E5E3; --blue:#2783DE; --blue-soft:#E5F2FC;
+    --board:#1d2320; --board-2:#232a26; --chalk:#f4f3ee; --chalk-dim:rgba(244,243,238,.62);
+    --chalk-line:rgba(244,243,238,.22); --yellow:#f2d06b;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .rv.in{opacity:1;transform:none}
+  .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+
+  /* ---------- nav ---------- */
+  header{position:absolute;top:0;left:0;right:0;z-index:10}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding-top:22px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--chalk);font-weight:700;letter-spacing:.22em;font-size:15px}
+  .brand svg{display:block}
+  .nav-cta{display:inline-flex;align-items:center;gap:8px;color:var(--chalk);text-decoration:none;font-size:14px;font-weight:600;border:1px solid var(--chalk-line);border-radius:8px;padding:9px 16px;transition:background .2s,border-color .2s}
+  .nav-cta:hover{background:rgba(244,243,238,.08);border-color:rgba(244,243,238,.45)}
+
+  /* ---------- hero ---------- */
+  .hero{background:radial-gradient(1200px 700px at 70% -10%,#27302b 0%,var(--board) 55%);color:var(--chalk);padding:128px 0 88px;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:20px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--yellow);border-radius:2px}
+  h1{font-size:56px;line-height:1.06;letter-spacing:-.02em;font-weight:700;margin-bottom:20px}
+  h1 em{font-style:normal;color:var(--yellow)}
+  .hero p.lead{font-size:18px;line-height:1.6;color:var(--chalk-dim);max-width:480px;margin-bottom:32px}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px;padding:13px 22px;transition:transform .15s,background .2s,color .2s,border-color .2s}
+  .btn:active{transform:translateY(1px)}
+  .btn-solid{background:var(--chalk);color:#1d2320}
+  .btn-solid:hover{background:#fff}
+  .btn-ghost{color:var(--chalk);border:1px solid var(--chalk-line)}
+  .btn-ghost:hover{border-color:rgba(244,243,238,.5);background:rgba(244,243,238,.06)}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:#1f72c6}
+
+  /* ---------- chalkboard panel ---------- */
+  .board{background:linear-gradient(160deg,#262e29,#202723);border:1px solid rgba(244,243,238,.14);border-radius:12px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.35);position:relative}
+  .board-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 4px}
+  .board-title{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-dim);font-weight:600}
+  .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--chalk-dim);font-weight:600;letter-spacing:.06em}
+  .live-dot i{width:7px;height:7px;border-radius:50%;background:#72BC8F;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .board svg{width:100%;height:auto;display:block}
+  .chip{position:absolute;top:52px;right:26px;background:rgba(242,208,107,.1);border:1px solid rgba(242,208,107,.55);color:var(--yellow);font-size:13px;font-weight:600;border-radius:8px;padding:7px 12px;backdrop-filter:blur(2px)}
+  .board-bar{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(244,243,238,.12);margin-top:8px;padding:12px 4px 2px}
+  .board-bar .step{font-size:12.5px;color:var(--chalk-dim)}
+  .speak{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--chalk);border:1px solid rgba(244,243,238,.35);border-radius:999px;padding:6px 14px}
+  .speak svg{display:block}
+
+  /* chalk stroke animation */
+  .chalk-stroke{stroke:var(--chalk);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:url(#chalkf)}
+  .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.6s ease forwards}
+  .draw.slow{animation-duration:2.6s}
+  .draw.dl1{animation-delay:.5s}.draw.dl2{animation-delay:1.1s}.draw.dl3{animation-delay:2s}.draw.dl4{animation-delay:2.6s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .fade{opacity:0;animation:fadein .8s ease forwards}
+  .fade.dl5{animation-delay:3.1s}.fade.dl6{animation-delay:3.5s}
+  @keyframes fadein{to{opacity:1}}
+  .board-label{font-family:var(--sans);fill:var(--chalk-dim);font-size:14px}
+  .board-label.y{fill:var(--yellow)}
+
+  /* ---------- sections ---------- */
+  section{padding:88px 0}
+  .sec-head{max-width:640px;margin-bottom:48px}
+  .sec-kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+  h2{font-size:36px;line-height:1.15;letter-spacing:-.015em;font-weight:700;margin-bottom:14px}
+  .sec-sub{font-size:17px;color:var(--ink-2);line-height:1.6}
+
+  /* problem */
+  .problem{background:var(--soft)}
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{background:var(--canvas);border:1px solid var(--border);border-radius:12px;padding:28px 26px}
+  .card h3{font-size:18px;font-weight:700;margin:16px 0 8px;letter-spacing:-.01em}
+  .card p{font-size:15px;color:var(--ink-2);line-height:1.6}
+  .icon-badge{width:44px;height:44px;border-radius:10px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center}
+
+  /* features */
+  .feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .feat{border:1px solid var(--border);border-radius:12px;padding:30px 28px;display:flex;gap:20px;align-items:flex-start;background:var(--canvas)}
+  .feat:nth-child(odd){background:var(--soft)}
+  .feat h3{font-size:17.5px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+  .feat p{font-size:15px;color:var(--ink-2);line-height:1.6}
+  .feat .icon-badge{flex-shrink:0}
+
+  /* steps */
+  .steps{background:var(--soft)}
+  .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:step}
+  .step-card{background:var(--canvas);border:1px solid var(--border);border-radius:12px;padding:30px 26px;position:relative}
+  .step-num{font-size:13px;font-weight:700;color:var(--blue);letter-spacing:.1em;margin-bottom:14px;display:block}
+  .step-card h3{font-size:18px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+  .step-card p{font-size:15px;color:var(--ink-2);line-height:1.6}
+
+  /* engineering */
+  .eng{background:radial-gradient(1000px 600px at 30% 0%,#27302b 0%,var(--board) 60%);color:var(--chalk)}
+  .eng .sec-kicker{color:var(--yellow)}
+  .eng h2{color:var(--chalk)}
+  .eng .sec-sub{color:var(--chalk-dim)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:40px}
+  .stat{border:1px solid rgba(244,243,238,.14);border-radius:12px;padding:24px 22px;background:rgba(244,243,238,.03)}
+  .stat b{display:block;font-size:32px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px;color:var(--chalk)}
+  .stat span{font-size:13.5px;color:var(--chalk-dim);line-height:1.5;display:block}
+  .eng-list{display:grid;grid-template-columns:1fr 1fr;gap:14px 32px;list-style:none}
+  .eng-list li{display:flex;gap:12px;font-size:15px;color:var(--chalk-dim);line-height:1.55;align-items:flex-start}
+  .eng-list li::before{content:"";flex-shrink:0;width:16px;height:2px;background:var(--yellow);border-radius:2px;margin-top:11px}
+  .eng-list li b{color:var(--chalk);font-weight:600}
+
+  /* cta */
+  .cta{text-align:center;padding:104px 0}
+  .cta h2{font-size:44px;margin-bottom:16px}
+  .cta p{font-size:17px;color:var(--ink-2);max-width:520px;margin:0 auto 32px;line-height:1.6}
+
+  footer{border-top:1px solid var(--border);padding:32px 0;background:var(--soft)}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .foot .left{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.22em;font-size:13px;color:var(--ink)}
+  .foot p{font-size:13.5px;color:var(--ink-2)}
+  .foot a{color:var(--ink-2);text-decoration:none;font-size:13.5px;font-weight:600}
+  .foot a:hover{color:var(--blue)}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:44px}
+    h1{font-size:42px}
+    .cards3,.steps-grid{grid-template-columns:1fr}
+    .feat-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+    .eng-list{grid-template-columns:1fr}
+    section{padding:64px 0}
+    .cta h2{font-size:32px}
+    .hero{padding:112px 0 64px}
+  }
+  @media (max-width:420px){
+    .wrap{padding:0 20px}
+    h1{font-size:36px}
+    .stats{grid-template-columns:1fr 1fr}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .rv{opacity:1;transform:none;transition:none}
+    .draw{stroke-dashoffset:0;animation:none}
+    .fade{opacity:1;animation:none}
+    .live-dot i{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="CHALK home">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="none" stroke="#f4f3ee" stroke-width="2"/><path d="M8 20 Q16 8 24 19" stroke="#f4f3ee" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="24" cy="19" r="2" fill="#f2d06b"/></svg>
+      CHALK
+    </a>
+    <a class="nav-cta" href="https://github.com/Shane12344321/chalk2">View the code
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top" style="padding-top:128px">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow rv in">Voice-native AI tutoring</span>
+      <h1 class="rv in d1">The tutor that <em>talks while it draws.</em></h1>
+      <p class="lead rv in d2">CHALK is a voice-first math and physics tutor that teaches on a living whiteboard — sketching diagrams as it explains, stopping the instant a student jumps in, and picking up exactly where it left off.</p>
+      <div class="hero-ctas rv in d3">
+        <a class="btn btn-solid" href="mailto:ceo@shanesarosh.xyz?subject=CHALK%20demo%20request">Request a live demo</a>
+        <a class="btn btn-ghost" href="https://github.com/Shane12344321/chalk2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+          See how it's built</a>
+      </div>
+    </div>
+
+    <div class="board rv in d2" role="img" aria-label="CHALK whiteboard mid-lesson: a chalk-drawn projectile motion curve with a checkpoint question asking where the curve peaks">
+      <div class="board-head">
+        <span class="board-title">Lesson · Projectile motion</span>
+        <span class="live-dot"><i></i>TEACHING</span>
+      </div>
+      <svg viewBox="0 0 620 430" aria-hidden="true">
+        <defs>
+          <filter id="chalkf" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+          </filter>
+        </defs>
+
+        <!-- ground -->
+        <path class="chalk-stroke draw" pathLength="1" d="M40 392 L590 392" opacity="0.85"/>
+        <!-- launch angle arc -->
+        <path class="chalk-stroke draw dl1" pathLength="1" d="M150 392 A80 80 0 0 0 112.6 324.2" style="stroke-width:2.4"/>
+        <text class="board-label fade dl5" x="146" y="368" font-size="17">θ</text>
+
+        <!-- full trajectory, dotted guide -->
+        <path class="chalk-stroke fade dl5" d="M70 392 Q330 -30 590 392" style="stroke-width:2;stroke-dasharray:1 11;opacity:.4" pathLength="1"/>
+
+        <!-- drawn-so-far solid stroke to the peak -->
+        <path class="chalk-stroke draw slow dl2" pathLength="1" d="M70 392 Q172 176 330 181"/>
+
+        <!-- peak marker -->
+        <g class="fade dl6">
+          <circle cx="330" cy="181" r="5.5" fill="#f2d06b"/>
+          <path d="M330 200 L330 392" stroke="#f2d06b" stroke-width="1.8" stroke-dasharray="2 9" opacity="0.7" fill="none"/>
+          <text class="board-label y" x="346" y="176" font-size="15">peak?</text>
+        </g>
+
+        <!-- velocity vector at launch -->
+        <g class="fade dl5">
+          <path class="chalk-stroke" d="M70 392 L158 298" style="stroke-width:2.4" marker-end="url(#arr)"/>
+          <text class="board-label" x="150" y="292" font-size="15" font-style="italic">v₀</text>
+        </g>
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#f4f3ee"/>
+          </marker>
+        </defs>
+
+        <!-- range label -->
+        <text class="board-label fade dl6" x="300" y="418" font-size="14" text-anchor="middle">range R = v₀² sin 2θ / g</text>
+      </svg>
+
+      <div class="chip">✋ Checkpoint — “Where does the curve peak?”</div>
+
+      <div class="board-bar">
+        <span class="step">Step 2 of 4 · ink frozen for a student question</span>
+        <span class="speak">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Speak
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROBLEM ================= -->
+<section class="problem">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-kicker">The problem</div>
+      <h2>Math and physics aren't chat problems.</h2>
+      <p class="sec-sub">Students learn these subjects by watching someone work through them — stroke by stroke, question by question. Today's tools can't do that.</p>
+    </div>
+    <div class="cards3">
+      <div class="card rv">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z" stroke="#2783DE" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>Text answers skip the work</h3>
+        <p>Chatbots hand over solutions as paragraphs. But understanding lives in the derivation — the part that never gets drawn.</p>
+      </div>
+      <div class="card rv d1">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="13" rx="2.5" stroke="#2783DE" stroke-width="1.8"/><path d="M10 9.5v4l4-2-4-2Z" fill="#2783DE"/></svg></div>
+        <h3>Video can't answer back</h3>
+        <p>Recorded lectures move at one speed and can't be interrupted. The moment a student gets lost, the lesson is over.</p>
+      </div>
+      <div class="card rv d2">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="#2783DE" stroke-width="1.8"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round"/><path d="M16 4.5h5M18.5 2v5" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3>Great tutors don't scale</h3>
+        <p>One-on-one teaching is the gold standard — and the most expensive, scarcest format in education.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-kicker">The product</div>
+      <h2>A teacher at the board, not a bot in a box.</h2>
+      <p class="sec-sub">CHALK pairs a realtime voice model with a deterministic drawing engine, so explanation and illustration happen as one act.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat rv">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19 15.5 7.5a2.1 2.1 0 0 1 3 3L7 22l-4 1 1-4Z" stroke="#2783DE" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        <div>
+          <h3>Speaks and sketches at once</h3>
+          <p>Voice and ink stay in lockstep. Each stroke lands with the sentence that explains it — the way a teacher writes while talking, not before or after.</p>
+        </div>
+      </div>
+      <div class="feat rv d1">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4.5 12 9l5-4.5M12 9v11" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 16.5c1.2 1.4 2.5 2 4 2s2.8-.6 4-2" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div>
+          <h3>Interruptible by design</h3>
+          <p>A student can jump in mid-stroke. The pen freezes exactly where it is, CHALK answers, then resumes the same stroke — never restarting, never skipping.</p>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="#2783DE" stroke-width="1.8"/><path d="M9.5 9.6a2.6 2.6 0 1 1 3.6 2.4c-.8.35-1.1.8-1.1 1.7" stroke="#2783DE" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.1" fill="#2783DE"/></svg></div>
+        <div>
+          <h3>Checks for understanding</h3>
+          <p>CHALK asks its own checkpoint questions — “Where does the curve peak?” — and waits for the student's answer before advancing the lesson.</p>
+        </div>
+      </div>
+      <div class="feat rv d1">
+        <div class="icon-badge"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.1 5.4L20 10l-5.9 1.6L12 17l-2.1-5.4L4 10l5.9-1.6L12 3Z" stroke="#2783DE" stroke-width="1.8" stroke-linejoin="round"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2Z" fill="#2783DE"/></svg></div>
+        <div>
+          <h3>Any topic, on demand</h3>
+          <p>Name a topic — chain rule, circuits, projectile motion — and a validated lesson stream generates the board step by step. Nothing unvalidated ever reaches the student.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="steps">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-kicker">How it works</div>
+      <h2>From question to whiteboard in seconds.</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card rv">
+        <span class="step-num">STEP 01</span>
+        <h3>Name a topic</h3>
+        <p>“Teach me projectile motion.” CHALK plans a bounded, multi-step lesson and validates every drawing instruction before a single stroke renders.</p>
+      </div>
+      <div class="step-card rv d1">
+        <span class="step-num">STEP 02</span>
+        <h3>Watch it teach</h3>
+        <p>The board draws itself while the voice explains — diagrams, axes, and equations appearing in sync with the narration, first ink in under six seconds.</p>
+      </div>
+      <div class="step-card rv d2">
+        <span class="step-num">STEP 03</span>
+        <h3>Jump in anytime</h3>
+        <p>Interrupt with a question mid-stroke. CHALK freezes the ink, answers out loud, checks understanding, and resumes right where it stopped.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ENGINEERING ================= -->
+<section class="eng">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-kicker">Under the hood</div>
+      <h2>Built like infrastructure, not a demo.</h2>
+      <p class="sec-sub">Every milestone shipped behind an evidence gate — measured, reproducible, and audited before it was accepted.</p>
+    </div>
+    <div class="stats">
+      <div class="stat rv"><b>&lt;6s</b><span>from request to first visible ink on the board</span></div>
+      <div class="stat rv d1"><b>39 / 39</b><span>lesson steps accepted across the ten-topic live rubric — zero repairs, drops, or retries</span></div>
+      <div class="stat rv d2"><b>13</b><span>golden lessons in the corpus-wide property test proving committed ink never moves</span></div>
+      <div class="stat rv d3"><b>WebRTC</b><span>realtime voice stack, with hard cost ceilings per session</span></div>
+    </div>
+    <ul class="eng-list">
+      <li class="rv"><span><b>Deterministic whiteboard.</b> A prefix-stable SVG renderer: streaming a new step can never disturb ink that's already on the board.</span></li>
+      <li class="rv d1"><span><b>Validated generation.</b> Lessons arrive as a schema-checked stream with scoped repair — raw model output is never rendered.</span></li>
+      <li class="rv d2"><span><b>Grounded conversation.</b> The tutor sees the board state, so questions, answers, and checkpoints reference what's actually drawn.</span></li>
+      <li class="rv d3"><span><b>Evidence-gated development.</b> Five consecutive live interruption trials and hash-matched timing runs gate every accepted milestone.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="cta">
+  <div class="wrap">
+    <h2 class="rv">Every student deserves a tutor<br>who shows the work.</h2>
+    <p class="rv d1">CHALK is a working, open-source prototype — voice, ink, and interruptions running end-to-end today. We'd love to show you a live lesson.</p>
+    <div class="hero-ctas rv d2" style="justify-content:center">
+      <a class="btn btn-blue" href="mailto:ceo@shanesarosh.xyz?subject=CHALK%20demo%20request">Request a live demo</a>
+      <a class="btn btn-ghost" style="color:var(--ink);border-color:var(--border)" href="https://github.com/Shane12344321/chalk2">Explore the repository</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="left">
+      <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="#1d2320"/><path d="M8 20 Q16 8 24 19" stroke="#f4f3ee" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="24" cy="19" r="2" fill="#f2d06b"/></svg>
+      CHALK
+    </div>
+    <p>An open-source prototype — voice, ink, and interruption working end-to-end.</p>
+    <a href="https://github.com/Shane12344321/chalk2">github.com/Shane12344321/chalk2</a>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var els = document.querySelectorAll('.rv:not(.in)');
+    var revealAll = function () { els.forEach(function (el) { el.classList.add('in'); }); };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      revealAll();
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(function (el) { io.observe(el); });
+    /* Fallback: never leave content hidden if observation stalls (e.g. print, capture tools) */
+    setTimeout(revealAll, 1600);
+  })();
+</script>
+</body>
+</html>
