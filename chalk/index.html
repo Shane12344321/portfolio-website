@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CHALK — The tutor that talks while it draws</title>
-<meta name="description" content="CHALK is a voice-first AI math and physics tutor that teaches on a living whiteboard — sketching as it explains, stopping the moment a student jumps in.">
+<meta name="description" content="CHALK is a voice-first AI math and physics tutor that teaches on a living whiteboard — sketching diagrams as it explains, stopping the moment a student jumps in.">
+<meta name="theme-color" content="#1d2320">
+<meta property="og:title" content="CHALK — The tutor that talks while it draws">
+<meta property="og:description" content="Voice-first AI math &amp; physics tutor that teaches on a living whiteboard.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='6' fill='%231d2320'/%3E%3Cpath d='M8 20 Q16 8 24 19' stroke='%23f4f3ee' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='19' r='2' fill='%23f2d06b'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -16,6 +20,7 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
+  html,body{overflow-x:hidden}
   body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
 
@@ -33,7 +38,7 @@
   .nav-cta:hover{background:rgba(244,243,238,.08);border-color:rgba(244,243,238,.45)}
 
   /* ---------- hero ---------- */
-  .hero{background:radial-gradient(1200px 700px at 70% -10%,#27302b 0%,var(--board) 55%);color:var(--chalk);padding:128px 0 88px;overflow:hidden}
+  .hero{background:radial-gradient(1200px 700px at 70% -10%,#27302b 0%,var(--board) 55%);color:var(--chalk);padding:128px 0 88px;overflow:hidden;position:relative}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:20px}
   .eyebrow::before{content:"";width:22px;height:2px;background:var(--yellow);border-radius:2px}
@@ -51,7 +56,7 @@
   .btn-blue:hover{background:#1f72c6}
 
   /* ---------- chalkboard panel ---------- */
-  .board{background:linear-gradient(160deg,#262e29,#202723);border:1px solid rgba(244,243,238,.14);border-radius:12px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.35);position:relative}
+  .board{background:linear-gradient(160deg,#262e29,#202723);border:1px solid rgba(244,243,238,.14);border-radius:12px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.35);position:relative;transition:transform .18s ease-out}
   .board-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 4px}
   .board-title{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-dim);font-weight:600}
   .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--chalk-dim);font-weight:600;letter-spacing:.06em}
@@ -100,7 +105,7 @@
   .feat .icon-badge{flex-shrink:0}
 
   /* steps */
-  .steps{background:var(--soft)}
+  .steps{background:var(--soft);background-image:linear-gradient(rgba(44,44,43,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(44,44,43,.05) 1px,transparent 1px);background-size:34px 34px}
   .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:step}
   .step-card{background:var(--canvas);border:1px solid var(--border);border-radius:12px;padding:30px 26px;position:relative}
   .step-num{font-size:13px;font-weight:700;color:var(--blue);letter-spacing:.1em;margin-bottom:14px;display:block}
@@ -108,7 +113,7 @@
   .step-card p{font-size:15px;color:var(--ink-2);line-height:1.6}
 
   /* engineering */
-  .eng{background:radial-gradient(1000px 600px at 30% 0%,#27302b 0%,var(--board) 60%);color:var(--chalk)}
+  .eng{background:radial-gradient(1000px 600px at 30% 0%,#27302b 0%,var(--board) 60%);color:var(--chalk);position:relative}
   .eng .sec-kicker{color:var(--yellow)}
   .eng h2{color:var(--chalk)}
   .eng .sec-sub{color:var(--chalk-dim)}
@@ -133,8 +138,38 @@
   .foot a{color:var(--ink-2);text-decoration:none;font-size:13.5px;font-weight:600}
   .foot a:hover{color:var(--blue)}
 
+  /* ---------- polish & flair ---------- */
+  ::selection{background:rgba(242,208,107,.35)}
+  a:focus-visible,.btn:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:8px}
+  .hero .wrap,.eng .wrap{position:relative;z-index:1}
+  .hero::after,.eng::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.055;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .doodles{position:absolute;inset:0;z-index:0;pointer-events:none;animation:floaty 14s ease-in-out infinite}
+  @keyframes floaty{50%{transform:translateY(-12px)}}
+  .doodles .txt{font-family:var(--sans);font-style:italic;fill:rgba(244,243,238,.5)}
+  .hand{position:absolute;top:-40px;right:10px;transform:rotate(-3deg);font-family:"Bradley Hand","Segoe Script","Comic Sans MS",cursive;font-size:18px;color:rgba(244,243,238,.85);pointer-events:none;white-space:nowrap}
+  .wave{display:inline-flex;gap:2.5px;align-items:center;margin-left:3px}
+  .wave b{width:2.5px;height:9px;background:var(--chalk-dim);border-radius:2px;transform:scaleY(.35);animation:wb 1.1s ease-in-out infinite}
+  .wave b:nth-child(2){animation-delay:.15s}
+  .wave b:nth-child(3){animation-delay:.3s}
+  .wave b:nth-child(4){animation-delay:.45s}
+  @keyframes wb{50%{transform:scaleY(1)}}
+  .ticker{background:#161b18;border-top:1px solid rgba(244,243,238,.1);border-bottom:1px solid rgba(244,243,238,.1);overflow:hidden;transform:rotate(-1.1deg);width:104%;margin:-10px 0 -10px -2%;padding:15px 0}
+  .ticker-track{display:flex;width:max-content;animation:tick 26s linear infinite}
+  .ticker:hover .ticker-track{animation-play-state:paused}
+  .ticker-set{display:flex;align-items:center;gap:26px;padding-right:26px;white-space:nowrap;font-size:12.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,243,238,.55)}
+  .ticker-set i{color:var(--yellow);font-style:normal;font-size:11px}
+  @keyframes tick{to{transform:translateX(-50%)}}
+  .sq{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 Q 14 2, 26 7 T 50 7 T 74 7 T 98 7 T 118 6' stroke='%232783DE' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") bottom/100% 9px no-repeat;padding-bottom:9px}
+  .card,.feat,.step-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .card:hover,.feat:hover,.step-card:hover{transform:translateY(-4px);border-color:#D6D4D1;box-shadow:0 10px 28px rgba(44,44,43,.08)}
+  .stat{transition:border-color .25s ease,background .25s ease}
+  .stat:hover{border-color:rgba(242,208,107,.45);background:rgba(242,208,107,.05)}
+  .btn svg,.nav-cta svg{transition:transform .2s ease}
+  .btn:hover svg,.nav-cta:hover svg{transform:translateX(3px)}
+
   /* ---------- responsive ---------- */
   @media (max-width:900px){
+    .hand{display:none}
     .hero-grid{grid-template-columns:1fr;gap:44px}
     h1{font-size:42px}
     .cards3,.steps-grid{grid-template-columns:1fr}
@@ -142,6 +177,7 @@
     .stats{grid-template-columns:1fr 1fr}
     .eng-list{grid-template-columns:1fr}
     section{padding:64px 0}
+    .ticker{padding:13px 0}
     .cta h2{font-size:32px}
     .hero{padding:112px 0 64px}
   }
@@ -157,6 +193,10 @@
     .draw{stroke-dashoffset:0;animation:none}
     .fade{opacity:1;animation:none}
     .live-dot i{animation:none}
+    .ticker-track,.wave b,.doodles{animation:none}
+    .ticker-track{margin-left:32px}
+    .wave b{transform:none}
+    .card,.feat,.step-card,.stat,.btn svg,.nav-cta svg,.board{transition:none}
   }
 </style>
 </head>
@@ -176,6 +216,19 @@
 
 <!-- ================= HERO ================= -->
 <section class="hero" id="top" style="padding-top:128px">
+  <svg class="doodles" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g stroke="#f4f3ee" fill="none" stroke-linecap="round">
+      <circle cx="118" cy="150" r="52" stroke-width="2.5" opacity="0.08"/>
+      <path d="M62 545 q30 -72 92 -62 q52 8 62 -44" stroke-width="2.5" opacity="0.09"/>
+      <path d="M60 470 l14 14 M74 470 l-14 14" stroke-width="2.5" opacity="0.1"/>
+      <path d="M1128 96 v20 M1118 106 h20" stroke-width="2.5" opacity="0.12"/>
+      <path d="M1052 560 q26 -34 66 -30" stroke-width="2.5" opacity="0.08"/>
+    </g>
+    <text class="txt" x="120" y="345" font-size="21" transform="rotate(5 120 345)" opacity="0.1">ΣF = ma</text>
+    <text class="txt" x="985" y="520" font-size="20" transform="rotate(-6 985 520)" opacity="0.1">Δv = g·t</text>
+    <text class="txt" x="1030" y="150" font-size="15" transform="rotate(-8 1030 150)" opacity="0.12">✦</text>
+    <text class="txt" x="70" y="240" font-size="13" opacity="0.1">✦</text>
+  </svg>
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow rv in">Voice-native AI tutoring</span>
@@ -190,9 +243,10 @@
     </div>
 
     <div class="board rv in d2" role="img" aria-label="CHALK whiteboard mid-lesson: a chalk-drawn projectile motion curve with a checkpoint question asking where the curve peaks">
+      <span class="hand">drawn live, mid-lesson ↓</span>
       <div class="board-head">
         <span class="board-title">Lesson · Projectile motion</span>
-        <span class="live-dot"><i></i>TEACHING</span>
+        <span class="live-dot"><i></i>TEACHING<span class="wave" aria-hidden="true"><b></b><b></b><b></b><b></b></span></span>
       </div>
       <svg viewBox="0 0 620 430" aria-hidden="true">
         <defs>
@@ -249,6 +303,18 @@
   </div>
 </section>
 
+<!-- ================= TOPIC TICKER ================= -->
+<section class="ticker" aria-label="Example topics CHALK can teach">
+  <div class="ticker-track">
+    <div class="ticker-set">
+      <span>Projectile motion</span><i>✦</i><span>Chain rule</span><i>✦</i><span>Ohm's law</span><i>✦</i><span>Free-body diagrams</span><i>✦</i><span>Conservation of energy</span><i>✦</i><span>Torque &amp; rotation</span><i>✦</i><span>L'Hôpital's rule</span><i>✦</i><span>Doppler effect</span><i>✦</i><span>Integration by parts</span><i>✦</i><span>Eigenvectors</span><i>✦</i>
+    </div>
+    <div class="ticker-set" aria-hidden="true">
+      <span>Projectile motion</span><i>✦</i><span>Chain rule</span><i>✦</i><span>Ohm's law</span><i>✦</i><span>Free-body diagrams</span><i>✦</i><span>Conservation of energy</span><i>✦</i><span>Torque &amp; rotation</span><i>✦</i><span>L'Hôpital's rule</span><i>✦</i><span>Doppler effect</span><i>✦</i><span>Integration by parts</span><i>✦</i><span>Eigenvectors</span><i>✦</i>
+    </div>
+  </div>
+</section>
+
 <!-- ================= PROBLEM ================= -->
 <section class="problem">
   <div class="wrap">
@@ -282,7 +348,7 @@
   <div class="wrap">
     <div class="sec-head rv">
       <div class="sec-kicker">The product</div>
-      <h2>A teacher at the board, not a bot in a box.</h2>
+      <h2>A teacher at the <span class="sq">board</span>, not a bot in a box.</h2>
       <p class="sec-sub">CHALK pairs a realtime voice model with a deterministic drawing engine, so explanation and illustration happen as one act.</p>
     </div>
     <div class="feat-grid">
@@ -354,9 +420,9 @@
       <p class="sec-sub">Every milestone shipped behind an evidence gate — measured, reproducible, and audited before it was accepted.</p>
     </div>
     <div class="stats">
-      <div class="stat rv"><b>&lt;6s</b><span>from request to first visible ink on the board</span></div>
-      <div class="stat rv d1"><b>39 / 39</b><span>lesson steps accepted across the ten-topic live rubric — zero repairs, drops, or retries</span></div>
-      <div class="stat rv d2"><b>13</b><span>golden lessons in the corpus-wide property test proving committed ink never moves</span></div>
+      <div class="stat rv"><b data-count="6" data-prefix="&lt;" data-suffix="s">&lt;6s</b><span>from request to first visible ink on the board</span></div>
+      <div class="stat rv d1"><b data-count="39" data-suffix=" / 39">39 / 39</b><span>lesson steps accepted across the ten-topic live rubric — zero repairs, drops, or retries</span></div>
+      <div class="stat rv d2"><b data-count="13">13</b><span>golden lessons in the corpus-wide property test proving committed ink never moves</span></div>
       <div class="stat rv d3"><b>WebRTC</b><span>realtime voice stack, with hard cost ceilings per session</span></div>
     </div>
     <ul class="eng-list">
@@ -371,7 +437,7 @@
 <!-- ================= CTA ================= -->
 <section class="cta">
   <div class="wrap">
-    <h2 class="rv">Every student deserves a tutor<br>who shows the work.</h2>
+    <h2 class="rv">Every student deserves a tutor<br><span class="sq">who shows the work.</span></h2>
     <p class="rv d1">CHALK is a working, open-source prototype — voice, ink, and interruptions running end-to-end today. We'd love to show you a live lesson.</p>
     <div class="hero-ctas rv d2" style="justify-content:center">
       <a class="btn btn-blue" href="mailto:ceo@shanesarosh.xyz?subject=CHALK%20demo%20request">Request a live demo</a>
@@ -393,18 +459,61 @@
 
 <script>
   (function () {
+    var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* count-up stats (final values already in markup as the no-JS fallback) */
+    var counters = Array.prototype.slice.call(document.querySelectorAll('.stat b[data-count]'));
+    function finalCounters() {
+      counters.forEach(function (b) { b.textContent = (b.dataset.prefix || '') + b.dataset.count + (b.dataset.suffix || ''); });
+    }
+    function runCounters() {
+      if (RM) { finalCounters(); return; }
+      counters.forEach(function (b, i) {
+        var target = parseInt(b.dataset.count, 10), pre = b.dataset.prefix || '', suf = b.dataset.suffix || '';
+        var dur = 1100, t0 = null;
+        function tick(ts) {
+          if (!t0) t0 = ts;
+          var p = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+          b.textContent = pre + Math.round(e * target) + suf;
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        setTimeout(function () { requestAnimationFrame(tick); }, i * 120);
+      });
+    }
+    var statsDone = false;
+    function startCounters() { if (statsDone) return; statsDone = true; runCounters(); }
+
     var els = document.querySelectorAll('.rv:not(.in)');
     var revealAll = function () { els.forEach(function (el) { el.classList.add('in'); }); };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
-      revealAll();
-      return;
+    if (RM || !('IntersectionObserver' in window)) {
+      revealAll(); startCounters();
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      els.forEach(function (el) { io.observe(el); });
+      var stats = document.querySelector('.stats');
+      if (stats) {
+        var so = new IntersectionObserver(function (en) {
+          en.forEach(function (e) { if (e.isIntersecting) { startCounters(); so.disconnect(); } });
+        }, { threshold: 0.35 });
+        so.observe(stats);
+      }
+      /* Fallback: never leave content hidden if observation stalls (e.g. print, capture tools) */
+      setTimeout(function () { revealAll(); startCounters(); }, 1600);
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { threshold: 0.12 });
-    els.forEach(function (el) { io.observe(el); });
-    /* Fallback: never leave content hidden if observation stalls (e.g. print, capture tools) */
-    setTimeout(revealAll, 1600);
+
+    /* subtle board tilt on pointer */
+    var board = document.querySelector('.board');
+    if (board && !RM && window.matchMedia('(pointer: fine)').matches) {
+      board.addEventListener('mousemove', function (e) {
+        var r = board.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        board.style.transform = 'perspective(950px) rotateY(' + (x * 5) + 'deg) rotateX(' + (-y * 5) + 'deg)';
+      });
+      board.addEventListener('mouseleave', function () { board.style.transform = ''; });
+    }
   })();
 </script>
 </body>
