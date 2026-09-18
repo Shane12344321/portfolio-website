@@ -1,0 +1,144 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{1.42in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\pdfgentounicode=1
+
+\newcommand{\resumeItem}[1]{
+  \item\small{#1\vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small #3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & #2 \\
+  \end{tabular*}\vspace{-4pt}
+}
+
+\newcommand{\resumeCertification}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & #2 \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in,label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.333in,label=$\bullet$]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-2pt}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\Huge \scshape Shane Sarosh} \\ \vspace{1pt}
+  \small \href{tel:+919847571313}{\underline{+91 9847571313}} $|$
+  \href{mailto:shanesarosh@gmail.com}{\underline{shanesarosh@gmail.com}} $|$
+  \href{https://github.com/Shane12344321}{\underline{github.com/Shane12344321}} $|$
+  Kochi, India
+\end{center}
+
+\section{Education}
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {Vellore Institute of Technology (VIT)}{Vellore, India}
+    {Bachelor of Technology in Computer Science and Engineering; CGPA: 8.79/10}{Aug. 2024 -- May 2028}
+\resumeSubHeadingListEnd
+
+\section{Experience}
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {South Indian Bank}{Kochi, India}
+    {AI Intern}{May 2026 -- Jun. 2026}
+  \resumeItemListStart
+    \resumeItem{Built NoteForge, an AI-assisted QA platform that converts banking business-requirement documents into structured, traceable test cases using FastAPI, Pydantic, and LLM-based generation.}
+    \resumeItem{Validated the system against digital-banking workflows spanning national eKYC identity verification (Aadhaar), core-banking integration (Finacle), and real-time payment rails (UPI/IMPS/NEFT/RTGS), including transaction limits and failure handling.}
+  \resumeItemListEnd
+\resumeSubHeadingListEnd
+\vspace{-9pt}
+
+\section{Research \& Projects}
+\resumeSubHeadingListStart
+  \resumeProjectHeading
+    {\textbf{Searchless Chess: Mechanistic Interpretability} $|$ \emph{Python, JAX, Scikit-learn}}
+    {\href{https://github.com/Shane12344321}{\underline{GitHub}} $|$ Jun. 2026}
+  \resumeItemListStart
+    \resumeItem{Probed eight chess concepts across all 17 layers of DeepMind's 270M-parameter Searchless Chess transformer, training 136 linear probes on 5,488 positions.}
+    \resumeItem{Recovered board state with near-perfect fidelity from layer activations (material balance $R^2 = 0.999$, center control $R^2 = 0.989$, near-ceiling castling-rights AUC).}
+    \resumeItem{Found that this interpretable structure peaks in layers 1--3 before degrading as later layers shift to encoding action values.}
+    \resumeItem{Built a Chrome extension and WebSocket pipeline that visualizes the transformer's move preferences in real time during post-game analysis.}
+  \resumeItemListEnd
+
+  \resumeProjectHeading
+    {\textbf{Hybrid Job Hunter} $|$ \emph{Python, Playwright, GitHub Actions, Telegram API}}
+    {\href{https://github.com/Shane12344321/hybrid-job-hunter}{\underline{GitHub}} $|$ Jul. 2026}
+  \resumeItemListStart
+    \resumeItem{Engineered adapters for seven ATS and career platforms, combining structured APIs with Playwright browser automation to monitor JavaScript-rendered career pages on scheduled GitHub Actions runs with no dedicated infrastructure.}
+    \resumeItem{Designed for fault tolerance --- per-source health tracking, request budgets, and queued retries --- running unattended on a scheduled cadence.}
+  \resumeItemListEnd
+
+  \resumeProjectHeading
+    {\textbf{Adaptive Shortest-Path Framework (ASPF)} $|$ \emph{C++, Python, Scikit-learn, NetworkX}}
+    {Feb. 2026}
+  \resumeItemListStart
+    \resumeItem{Developed a runtime system that dynamically selects among BFS, Dijkstra's algorithm, and Dial's algorithm by analyzing graph structural properties.}
+    \resumeItem{Trained a Random Forest classifier that correctly selects the fastest shortest-path algorithm on 88\% of held-out test graphs.}
+    \resumeItem{Improved execution time by up to 73\% over fixed Dijkstra baselines on sparse graphs and 58\% on uniform-weight graphs.}
+  \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0.15in,label={}]
+  \small\item{
+    \textbf{Languages:} Python, C++, JavaScript, \LaTeX \\
+    \textbf{ML \& Interpretability:} JAX, Scikit-learn, linear probing, NetworkX \\
+    \textbf{Tools \& Infra:} FastAPI, Pydantic, Playwright, GitHub Actions, Git, WebSockets, Chrome Extensions, Telegram API
+  }
+\end{itemize}
+
+\section{Certifications}
+\resumeSubHeadingListStart
+  \resumeCertification
+    {\href{https://learn.microsoft.com/api/credentials/share/en-us/ShaneSarosh-4541/6D0496784CD7B02E?sharingId}{\textbf{Microsoft Certified: Azure AI Fundamentals}} $|$ \emph{Microsoft}}
+    {\href{https://learn.microsoft.com/api/credentials/share/en-us/ShaneSarosh-4541/6D0496784CD7B02E?sharingId}{\underline{Credential}}}
+  \resumeCertification
+    {\href{https://www.credly.com/go/Eq9ajG6F}{\textbf{Qiskit Global Summer School 2026 - Quantum Excellence}} $|$ \emph{IBM}}
+    {\textit{Aug. 2026}}
+\resumeSubHeadingListEnd
+
+\end{document}
