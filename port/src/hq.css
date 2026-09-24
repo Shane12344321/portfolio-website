@@ -1,0 +1,15 @@
+/* ───────── High graphics layer ───────── */
+#hq{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:0;pointer-events:none;outline:none;transition:opacity .9s ease}
+body.hq #hq{opacity:1;pointer-events:auto}
+body.hq:not(.zoomed) #hq{cursor:pointer}
+#hq:focus-visible{box-shadow:inset 0 0 0 2px var(--hud-ink)}
+#hq-screen{position:fixed;left:0;top:0;z-index:2;width:640px;height:428px;transform-origin:0 0;pointer-events:none}
+body.hq.zoomed #hq-screen{pointer-events:auto}
+#hq-screen #screen{left:0;top:0}
+#hq-screen::after{content:"";position:absolute;inset:0;z-index:2;border-radius:16px/18px;pointer-events:none;background:linear-gradient(162deg,rgba(255,255,255,.07),rgba(255,255,255,0) 32%),radial-gradient(38% 26% at 86% 10%,rgba(255,196,130,.09),rgba(255,196,130,0) 70%)}
+body:not(.hq) #hq-screen{display:none}
+body.hq-done #room{display:none}
+body.hq::after{opacity:0}
+.hud button:disabled{opacity:.55;cursor:default}
+html.mobile #hq,html.mobile #hq-screen{display:none}
+html.mobile #btn-gfx{display:none}

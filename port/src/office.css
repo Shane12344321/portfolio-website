@@ -1,0 +1,55 @@
+/* ───────── The studio: evening, lamp on ───────── */
+body{background:#18201b}
+body::after{content:"";position:fixed;inset:0;z-index:6;pointer-events:none;background:radial-gradient(120% 95% at 50% 42%,transparent 52%,rgba(6,8,7,.55));transition:opacity 1s}
+body.zoomed::after{opacity:0}
+
+.wall{position:absolute;left:-2500px;top:-2500px;width:6600px;height:3492px;background-color:#24302a;background-image:
+  radial-gradient(1100px 820px at 4120px 3160px,rgba(255,186,104,.26),rgba(255,186,104,0) 70%),
+  radial-gradient(900px 900px at 2330px 2900px,rgba(140,165,215,.09),rgba(140,165,215,0) 70%),
+  linear-gradient(#1c251f 0,#1c251f 2200px,#33453a 3492px)}
+.wall::after{content:"";position:absolute;inset:0;opacity:.55;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* Steel-framed window onto a Brooklyn dusk */
+.window{position:absolute;left:-470px;top:-70px;width:640px;height:840px;box-sizing:border-box;overflow:hidden;border:16px solid #111312;background:#0c1018;box-shadow:0 0 0 12px #243029,0 0 0 13px rgba(255,255,255,.05),0 30px 60px rgba(0,0,0,.45)}
+.sky{position:absolute;inset:0;background:linear-gradient(#121a30 0%,#223055 30%,#5d4f73 56%,#c98068 74%,#f0b27a 84%,#f6c98d 90%)}
+.moon{position:absolute;left:430px;top:110px;width:34px;height:34px;border-radius:50%;background:#f3ead4;box-shadow:0 0 30px 8px rgba(243,234,212,.25)}
+.stars{position:absolute;inset:0 0 50% 0;background-image:radial-gradient(1px 1px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 34% 8%,#fff,transparent),radial-gradient(1px 1px at 58% 22%,#dfe6ff,transparent),radial-gradient(1px 1px at 22% 36%,#fff,transparent),radial-gradient(1px 1px at 84% 30%,#fff,transparent),radial-gradient(1px 1px at 46% 40%,#cfd8ff,transparent);opacity:.7}
+.city{position:absolute;left:0;bottom:0;width:100%;height:52%}
+.sheen{position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,0) 30%,rgba(255,255,255,0) 58%,rgba(255,255,255,.04) 70%,rgba(255,255,255,0) 82%)}
+.mullions{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr)}
+.mullions i{border:4px solid #111312;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.sill{position:absolute;left:-496px;top:782px;width:692px;height:16px;background:linear-gradient(#34443a,#1f2923);box-shadow:0 10px 18px rgba(0,0,0,.4)}
+
+/* Swiss poster */
+.poster{position:absolute;left:1330px;top:30px;width:300px;height:410px;box-sizing:border-box;padding:18px;background:#f4f1ea;border:9px solid #141414;box-shadow:0 24px 50px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.1)}
+.poster .paper{position:relative;height:100%;overflow:hidden;background:#eadfc7}
+.poster i{position:absolute;display:block}
+.p-sun{left:-40px;top:-30px;width:210px;height:210px;border-radius:50%;background:#d4553a}
+.p-ring{right:-60px;top:70px;width:180px;height:180px;border-radius:50%;border:16px solid #1d1d1b}
+.p-bar{left:0;right:0;top:196px;height:14px;background:#1d1d1b}
+.p-bar2{left:0;width:56%;top:218px;height:14px;background:#d9a441}
+.p-title{position:absolute;left:14px;bottom:36px;font:italic 400 34px/.92 var(--serif);color:#1d1d1b;letter-spacing:-.01em}
+.p-foot{position:absolute;left:14px;right:14px;bottom:12px;display:flex;justify-content:space-between;font:500 9px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#1d1d1b}
+
+/* Walnut desk + floor */
+.desk{position:absolute;left:-2500px;top:990px;width:6600px;height:480px;background-color:#5b3b27;background-image:
+  radial-gradient(640px 220px at 3880px 100px,rgba(255,196,120,.3),rgba(255,196,120,0) 70%),
+  linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,0) 90px,rgba(0,0,0,0) 300px,rgba(0,0,0,.28)),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='320'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0022 .085' numOctaves='3' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .11 0 0 0 0 .06 0 0 0 -1.1 1.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%236a4530'/%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E")}
+.desk::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:rgba(0,0,0,.5)}
+.desk::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(#80563a,#4b2f1e);box-shadow:0 20px 34px rgba(0,0,0,.6)}
+.floor{position:absolute;left:-2500px;top:1470px;width:6600px;height:2500px;background:linear-gradient(#0d0e0d,#070807 600px)}
+
+/* Objects */
+.plant{position:absolute;left:80px;top:430px;width:320px;height:570px;overflow:visible}
+.lamp{position:absolute;left:1480px;top:520px;width:380px;height:480px;overflow:visible}
+.mug{position:absolute;left:1585px;top:1150px;width:120px;height:140px;overflow:visible}
+.steam path{fill:none;stroke:rgba(255,255,255,.22);stroke-width:5;stroke-linecap:round;animation:steam 5s ease-in-out infinite}
+.steam path+path{animation-delay:-2.4s}
+@keyframes steam{0%{opacity:0;transform:translateY(8px)}35%{opacity:1}100%{opacity:0;transform:translateY(-26px)}}
+.pad-wrap{position:absolute;left:1328px;top:1094px;width:224px;height:272px;perspective:900px}
+.pad{position:absolute;inset:0;transform:rotateX(28deg);transform-origin:50% 0;border-radius:12px;background:#2a3036;box-shadow:inset 0 0 0 2px rgba(255,255,255,.05),inset 0 -3px 0 rgba(0,0,0,.35),0 16px 22px rgba(0,0,0,.45)}
+
+@media (prefers-reduced-motion:reduce){.steam path{animation:none;opacity:.6}}
+html.mobile .wall,html.mobile .window,html.mobile .sill,html.mobile .poster,html.mobile .floor,html.mobile .plant,html.mobile .lamp,html.mobile .mug,html.mobile .pad-wrap,html.mobile body::after{display:none}
+@media (max-height:760px){.placard{padding:12px 14px 10px}.placard p{display:none}.placard h1{font-size:26px;margin-top:6px}.placard .role{margin-bottom:0}}

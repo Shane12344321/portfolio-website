@@ -1,0 +1,113 @@
+<div id="room">
+  <div id="stage">
+    <div class="wall"></div>
+    <div class="window" aria-hidden="true">
+      <div class="sky"></div><div class="stars"></div><div class="moon"></div>
+      <svg class="city" id="city" viewBox="0 0 608 420" preserveAspectRatio="xMidYMax slice"></svg>
+      <div class="sheen"></div>
+      <div class="mullions"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="sill"></div>
+    <div class="poster" aria-hidden="true"><div class="paper">
+      <i class="p-sun"></i><i class="p-ring"></i><i class="p-bar"></i><i class="p-bar2"></i>
+      <div class="p-title">Systems<br>that stay up.</div>
+      <div class="p-foot"><span>N° 07</span><span>Brooklyn · 1984</span></div>
+    </div></div>
+    <div class="desk"></div>
+    <div class="floor"></div>
+    <div class="shadow" style="left:360px;top:966px;width:880px;height:64px"></div>
+    <div class="shadow" style="left:300px;top:1330px;width:1000px;height:64px"></div>
+    <svg class="plant" id="plant" viewBox="0 0 320 570" aria-hidden="true"></svg>
+    <svg class="cord" viewBox="0 0 1600 1500" aria-hidden="true">
+      <path class="sh" id="cord-sh" transform="translate(3 6)"/>
+      <path class="ln" id="cord-ln"/>
+    </svg>
+
+    <div class="mac" id="mac">
+      <div class="mac-lid"></div>
+      <div class="mac-face">
+        <div class="groove"></div>
+        <svg class="logo" viewBox="0 0 30 36" aria-hidden="true">
+          <defs><clipPath id="apl"><path d="M15 11C10 7.5 2 9 2 19c0 8 5 16 9 16 2 0 2.5-1 4-1s2 1 4 1c4 0 8.5-7 9.5-11-3.5-1.5-5-4.5-4.5-7.5.5-2.5 2-4 3-4.7C24.5 8.5 19 7.5 15 11Z"/><path d="M15 9.5C15 5 18 1.5 22 1c0 4.5-3 8-7 8.5Z"/></clipPath></defs>
+          <g clip-path="url(#apl)">
+            <rect width="30" height="15.5" fill="#61bb46"/><rect y="15.5" width="30" height="4" fill="#fdb827"/><rect y="19.5" width="30" height="4" fill="#f5821f"/><rect y="23.5" width="30" height="4" fill="#e03a3e"/><rect y="27.5" width="30" height="4" fill="#963d97"/><rect y="31.5" width="30" height="5" fill="#009ddc"/>
+          </g>
+        </svg>
+        <div class="floppy"><i class="slot"></i><i class="door"></i><i class="eject"></i></div>
+      </div>
+      <div class="mac-foot"></div>
+      <div class="bezel"><div class="glass">
+        <div id="screen">
+          <div class="power-hint">Tap to switch on</div>
+          <div class="inner" id="inner">
+            <nav class="menubar" id="menubar" aria-label="Menu bar"></nav>
+            <div class="desktop" id="desktop">
+              <button class="dicon" id="icon-disk" type="button" style="right:8px;top:8px"><img alt=""><span>Portfolio</span></button>
+              <button class="dicon" id="icon-trash" type="button" style="right:8px;bottom:8px"><img alt=""><span>Trash</span></button>
+              <div id="windows"></div>
+            </div>
+            <div id="zoomlayer"></div>
+            <div id="menus"></div>
+            <div id="modal-root"></div>
+            <div class="boot" id="boot" hidden></div>
+          </div>
+          <div class="fx"></div>
+        </div>
+      </div></div>
+      <button class="hit" id="hit" type="button" aria-label="Switch on the Macintosh"></button>
+    </div>
+
+    <svg class="lamp" viewBox="0 0 380 480" aria-hidden="true">
+      <defs>
+        <linearGradient id="lm" x1="0" x2="1"><stop offset="0" stop-color="#161616"/><stop offset=".45" stop-color="#3b3b3b"/><stop offset="1" stop-color="#121212"/></linearGradient>
+        <radialGradient id="lb"><stop offset="0" stop-color="#fffaf0"/><stop offset=".55" stop-color="#ffdc96"/><stop offset="1" stop-color="#e9a24a"/></radialGradient>
+        <linearGradient id="lbeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd89c" stop-opacity=".2"/><stop offset="1" stop-color="#ffd89c" stop-opacity="0"/></linearGradient>
+      </defs>
+      <path d="M47 151 116 198 70 470-200 470Z" fill="url(#lbeam)"/>
+      <ellipse cx="282" cy="470" rx="66" ry="10" fill="#000" opacity=".55"/>
+      <path d="M224 463q0-15 58-17 58 2 58 17 0 8-58 9-58-1-58-9Z" fill="url(#lm)"/>
+      <path d="M232 458q50-8 100 0" stroke="rgba(255,255,255,.12)" stroke-width="2" fill="none"/>
+      <line x1="276" y1="448" x2="312" y2="212" stroke="#1e1e1e" stroke-width="7" stroke-linecap="round"/>
+      <line x1="290" y1="446" x2="325" y2="216" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+      <path d="M296 420l9-5-7-6 9-5-7-6 9-5-7-6 9-5" stroke="#8d8d8d" stroke-width="2" fill="none"/>
+      <line x1="318" y1="212" x2="132" y2="116" stroke="#1e1e1e" stroke-width="7" stroke-linecap="round"/>
+      <line x1="324" y1="200" x2="138" y2="104" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="283" cy="448" r="8" fill="#b08d57"/><circle cx="318" cy="210" r="9" fill="#b08d57"/><circle cx="131" cy="115" r="8" fill="#b08d57"/>
+      <g transform="rotate(34 124 112)">
+        <path d="M110 114q14-12 28 0l28 74q-42 18-84 0Z" fill="url(#lm)"/>
+        <path d="M118 112q6-4 12 0l6 30" stroke="rgba(255,255,255,.14)" stroke-width="2" fill="none"/>
+        <ellipse cx="124" cy="190" rx="42" ry="10" fill="url(#lb)"/>
+      </g>
+    </svg>
+
+    <div class="kbd-wrap" aria-hidden="true"><div class="kbd"><div class="keys" id="keys"></div></div></div>
+    <div class="shadow" style="left:1340px;top:1290px;width:200px;height:50px"></div>
+    <div class="pad-wrap" aria-hidden="true"><div class="pad"></div></div>
+    <div class="mouse-wrap" aria-hidden="true"><div class="mouse" id="mouse"><i class="btn" id="mouse-btn"></i><i class="mark"></i></div></div>
+    <svg class="mug" viewBox="0 0 120 140" aria-hidden="true">
+      <defs><linearGradient id="mb" x1="0" x2="1"><stop offset="0" stop-color="#b9b1a0"/><stop offset=".35" stop-color="#f1ebdf"/><stop offset="1" stop-color="#a8a090"/></linearGradient></defs>
+      <g class="steam"><path d="M40 12c-8-10 8-16 0-28s6-18 2-26"/><path d="M60 10c-8-10 8-16 0-28s6-18 2-26"/></g>
+      <ellipse cx="52" cy="132" rx="50" ry="8" fill="#000" opacity=".4"/>
+      <path d="M94 50q24 0 24 24t-24 24" fill="none" stroke="#cfc7b7" stroke-width="10"/>
+      <path d="M10 26v90q0 16 42 16t42-16V26Z" fill="url(#mb)"/>
+      <path d="M10 34q42 14 84 0" stroke="#27406b" stroke-width="5" fill="none"/>
+      <ellipse cx="52" cy="26" rx="42" ry="10" fill="#27406b"/>
+      <ellipse cx="52" cy="27" rx="37" ry="7.5" fill="#2e1b10"/>
+    </svg>
+  </div>
+</div>
+
+<aside class="placard" aria-label="Exhibit label">
+  <div class="acc"><span>Studio desk · Brooklyn</span><span>1984</span></div>
+  <h1><em id="plac-name">Jordan Vale</em></h1>
+  <div class="role" id="plac-role">Software Engineer</div>
+  <p>Apple Macintosh 128K. Beige ABS case, 9-inch monochrome CRT, 400K floppy drive. Loaded with one engineer's portfolio, browsed entirely from the menu bar.</p>
+  <div class="cta" id="plac-cta">Click the Macintosh to switch it on</div>
+</aside>
+
+<div class="hud">
+  <button type="button" id="btn-back">Step back · Esc</button>
+  <button type="button" id="btn-gfx" aria-pressed="true" disabled>Graphics: loading…</button>
+  <button type="button" id="btn-music" aria-pressed="true">Music on</button>
+  <button type="button" id="btn-sound" aria-pressed="true">Effects on</button>
+</div>
