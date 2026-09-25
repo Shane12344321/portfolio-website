@@ -23,7 +23,8 @@ V('resume', { title: 'Résumé', w: 470, h: 350, render(c) {
     <h3>Education</h3>
     <div class="row2"><b>${esc(C.education.degree)}, ${esc(C.education.school)}</b><span>${esc(C.education.dates)}</span></div>
     <h3>Skills</h3>
-    <p>${Object.values(C.skills).flatMap(s => s.items.map(i => i[0])).map(esc).join(' · ')}</p>`;
+    <p>${Object.values(C.skills).flatMap(s => s.items).map(esc).join(' · ')}</p>
+    <div class="actions">${ext('https://shanesarosh.xyz/resume.pdf', 'Open full PDF résumé')}</div>`;
 } });
 
 C.projects.forEach(p => V('project-' + p.id, { title: p.name, w: 460, h: 340, render(c) {
@@ -31,7 +32,7 @@ C.projects.forEach(p => V('project-' + p.id, { title: p.name, w: 460, h: 340, re
     <h2>${esc(p.name)}</h2><div class="sub">${esc(p.kind)}</div>
     <div class="meta"><span>${p.year}</span><span>${esc(p.role)}</span><span>${esc(p.status)}</span></div>
     <p>${esc(p.summary)}</p>
-    <div class="stats">${p.stats.map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('')}</div>
+    ${p.stats.length ? `<div class="stats">${p.stats.map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('')}</div>` : ''}
     <h3>Highlights</h3>${bullets(p.highlights)}
     <h3>Built with</h3>${tags(p.stack)}
     <div class="actions">${ext(p.link.href, p.link.label)}</div>`;
@@ -72,13 +73,11 @@ V('education', { title: 'Education', w: 380, h: 210, render(c) {
 } });
 
 Object.entries(C.skills).forEach(([cat, s]) => V('skills-' + slug(cat), { title: cat, w: 400, h: 270, render(c) {
-  c.innerHTML = `<p>${esc(s.blurb)}</p>
-    <div class="bars">${s.items.map(([n, v, note]) => `<div class="b"><span>${esc(n)}</span><div class="bar" role="img" aria-label="${esc(n)}: ${v} out of 100"><i style="--v:${v}%"></i></div><span class="yrs">${esc(note || '')}</span></div>`).join('')}</div>
-    <p class="note">Bars show comfort, not years.</p>`;
+  c.innerHTML = `<p>${esc(s.blurb)}</p>${tags(s.items)}`;
 } }));
 
-V('learning', { title: 'Currently Learning', w: 340, h: 190, render(c) {
-  c.innerHTML = `<p>What's on the desk right now:</p>${bullets(C.learning)}`;
+V('learning', { title: 'Areas of Interest', w: 340, h: 190, render(c) {
+  c.innerHTML = `<p>Topics I keep coming back to:</p>${bullets(C.learning)}`;
 } });
 
 async function copyEmail(noteEl) {
@@ -105,15 +104,12 @@ V('contact', { title: 'Contact Card', w: 380, h: 270, render(c) {
   });
 } });
 
-V('github', { title: 'GitHub Activity', w: 440, h: 310, render(c) {
-  c.innerHTML = `<div class="sub">${esc(C.contact.github.label)}</div><canvas class="heat" aria-hidden="true"></canvas>
-    <div class="note contrib"></div>
-    <h3>Pinned</h3>
-    <table class="list"><thead><tr><th>Repository</th><th>About</th><th class="num">Stars</th></tr></thead>
-    <tbody>${C.repos.map(([n, d, s]) => `<tr><td><b>${esc(n)}</b></td><td>${esc(d)}</td><td class="num">${s.toLocaleString('en-US')}</td></tr>`).join('')}</tbody></table>
+V('github', { title: 'GitHub Profile', w: 440, h: 310, render(c) {
+  c.innerHTML = `<div class="sub">${esc(C.contact.github.label)}</div>
+    <h3>Selected repositories</h3>
+    <table class="list"><thead><tr><th>Repository</th><th>About</th></tr></thead>
+    <tbody>${C.repos.map(([n, d, href]) => `<tr><td>${ext(href, n, 'lnk')}</td><td>${esc(d)}</td></tr>`).join('')}</tbody></table>
     <div class="actions">${ext(C.contact.github.href, 'Open GitHub')}</div>`;
-  const total = drawHeat(c.querySelector('canvas'));
-  c.querySelector('.contrib').textContent = `${total.toLocaleString('en-US')} contributions in the last year`;
 } });
 
 V('about-portfolio', { title: 'About This Portfolio', w: 390, h: 250, fixed: true, render(c) {
@@ -128,7 +124,7 @@ V('notepad', { title: 'Note Pad', w: 300, h: 220, render(c) {
   c.classList.add('flush');
   c.innerHTML = '<textarea class="np" id="notepad" aria-label="Note Pad" spellcheck="false"></textarea>';
   const t = c.firstChild;
-  t.value = store.get('notepad', 'Notes you type here stay in this browser.\n\nTry Projects ▸ Slate next.');
+  t.value = store.get('notepad', 'Notes you type here stay in this browser.\n\nTry Projects ▸ Searchless Chess next.');
   t.addEventListener('input', () => store.set('notepad', t.value));
 } });
 
@@ -196,14 +192,14 @@ WM.setMenus([
     { label: 'Timeline…', key: 'T', act: go('timeline') }, { label: 'Education…', act: go('education') }] },
   { title: 'Skills', items: [
     ...Object.keys(C.skills).map(k => ({ label: k + '…', act: go('skills-' + slug(k)) })), '-',
-    { label: 'Currently Learning…', act: go('learning') }] },
+    { label: 'Areas of Interest…', act: go('learning') }] },
   { title: 'Contact', items: [
     { label: 'Contact Card…', key: 'K', act: go('contact') },
     { label: 'Copy Email Address', act: async () => {
       const ok = await copyEmail();
       WM.alert({ icon: 'note', html: ok ? `Copied <b>${esc(C.contact.email)}</b> to the clipboard.` : `Couldn't reach the clipboard. The address is <b>${esc(C.contact.email)}</b>.` });
     } }, '-',
-    { label: 'GitHub Activity…', key: 'G', act: go('github') }, { label: 'Availability…', act: () => WM.alert({ icon: 'note', html: `<b>Availability</b><br>${esc(C.contact.availability)}` }) }] },
+    { label: 'GitHub Profile…', key: 'G', act: go('github') }, { label: 'Availability…', act: () => WM.alert({ icon: 'note', html: `<b>Availability</b><br>${esc(C.contact.availability)}` }) }] },
   { title: 'Special', items: [
     { label: 'Clean Up Windows', act: () => WM.cleanUp(), enabled: () => WM.count() > 0 }, '-',
     { label: 'Step Back', key: '.', act: () => setZoom(false), enabled: () => !view.mobile }, '-',

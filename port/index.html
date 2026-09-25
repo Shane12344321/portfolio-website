@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Jordan Vale's Macintosh</title>
+<title>Shane Sarosh's Macintosh</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap">
@@ -344,8 +344,8 @@ html.mobile #btn-gfx{display:none}
     <div class="sill"></div>
     <div class="poster" aria-hidden="true"><div class="paper">
       <i class="p-sun"></i><i class="p-ring"></i><i class="p-bar"></i><i class="p-bar2"></i>
-      <div class="p-title">Systems<br>that stay up.</div>
-      <div class="p-foot"><span>N° 07</span><span>Brooklyn · 1984</span></div>
+      <div class="p-title">Curiosity<br>in motion.</div>
+      <div class="p-foot"><span>N° 07</span><span>Kochi · 1984</span></div>
     </div></div>
     <div class="desk"></div>
     <div class="floor"></div>
@@ -432,9 +432,9 @@ html.mobile #btn-gfx{display:none}
 </div>
 
 <aside class="placard" aria-label="Exhibit label">
-  <div class="acc"><span>Studio desk · Brooklyn</span><span>1984</span></div>
-  <h1><em id="plac-name">Jordan Vale</em></h1>
-  <div class="role" id="plac-role">Software Engineer</div>
+  <div class="acc"><span>Studio desk · Kochi</span><span>1984</span></div>
+  <h1><em id="plac-name">Shane Sarosh</em></h1>
+  <div class="role" id="plac-role">CS Student · AI & Software Engineering</div>
   <p>Apple Macintosh 128K. Beige ABS case, 9-inch monochrome CRT, 400K floppy drive. Loaded with one engineer's portfolio, browsed entirely from the menu bar.</p>
   <div class="cta" id="plac-cta">Click the Macintosh to switch it on</div>
 </aside>
@@ -446,117 +446,81 @@ html.mobile #btn-gfx{display:none}
   <button type="button" id="btn-sound" aria-pressed="true">Effects on</button>
 </div>
 <script>
-/* ─────────────────────────────────────────────────────────────
-   PORTFOLIO CONTENT: everything below is filler. Edit freely.
-   Menus and windows are generated from this object.
-   ───────────────────────────────────────────────────────────── */
+/* Content grounded in Shane's public résumé and portfolio. */
 const C = {
-  name: 'Jordan Vale',
-  first: 'Jordan',
-  role: 'Software Engineer',
-  location: 'Brooklyn, NY',
-  hours: 'New York time (UTC−5)',
+  name: 'Shane Sarosh',
+  first: 'Shane',
+  role: 'CS Student · AI & Software Engineering',
+  location: 'Kochi, India',
+  hours: 'India Standard Time (UTC+5:30)',
   about: [
-    "I'm a software engineer with seven years of experience across backend infrastructure, developer tooling, and the occasional frontend I get attached to.",
-    "I like problems where correctness matters and latency shows: sync engines, schedulers, anything with a queue in the middle. Off the clock I maintain a couple of open-source CLIs and restore old computers, which explains the machine you're using."
+    "I'm a Computer Science and Engineering undergraduate at VIT, interested in understanding how AI systems work and building software that makes them useful.",
+    "My work spans mechanistic interpretability, developer tools, and applied AI. I have probed a chess model's internal representations, built a fault-tolerant job monitoring pipeline, and developed an AI-assisted QA tool during an internship at South Indian Bank."
   ],
   facts: [
-    ['Now', 'Senior Software Engineer, Northwind Labs'],
-    ['Focus', 'Distributed systems, developer tools'],
-    ['Usual stack', 'TypeScript, Go, Rust, Postgres'],
-    ['Status', 'Open to staff-level roles']
+    ['Now', 'B.Tech in Computer Science and Engineering, VIT'],
+    ['Focus', 'AI research, interpretability, software engineering'],
+    ['Experience', 'AI Intern, South Indian Bank (2026)'],
+    ['Graduation', 'May 2028']
   ],
-  whoami: '$ whoami\njordan: builds systems that stay up\n$ uptime\n7 yrs in production, 0 pages ignored',
-
-  // `art` picks the dithered banner: pages | orbit | waves | terminal | ledger
+  whoami: '$ whoami\nshane: curious about how intelligent systems work\n$ ls projects\nsearchless-chess  hybrid-job-hunter  noteforge  aspf  chalk',
   projects: [
-    { id: 'slate', name: 'Slate', year: 2025, kind: 'Local-first notes app', role: 'Creator', status: 'Shipping', art: 'pages',
-      summary: 'A notes app that works offline first and syncs through CRDTs, so edits from a laptop, phone and tablet merge without conflicts or a spinner.',
-      stats: [['12k', 'weekly users'], ['28 ms', 'p95 sync'], ['4.8★', 'App Store rating']],
-      highlights: [
-        'Designed the sync protocol on Yjs, with a Rust server fanning updates out over WebSockets.',
-        'Cut cold start from 1.9 s to 340 ms by moving the search index into on-device SQLite.',
-        'Built the conflict-free outline editor used for nested lists.'
-      ],
-      stack: ['TypeScript', 'Rust', 'SQLite', 'Yjs', 'WebSockets'],
-      link: { label: 'slate.example.com', href: 'https://example.com' } },
-    { id: 'orbit', name: 'Orbit', year: 2024, kind: 'Distributed job scheduler', role: 'Tech lead', status: 'In production', art: 'orbit',
-      summary: "Runs 40 million background jobs a day for Northwind's platform, with at-least-once delivery, priority lanes, and a dashboard people actually open.",
-      stats: [['40M', 'jobs per day'], ['99.99%', 'uptime, 12 months'], ['−62%', 'infra cost']],
-      highlights: [
-        'Replaced a cron-and-Redis setup with a Postgres-backed lease queue, adding no new infrastructure.',
-        'Built backpressure that sheds low-priority work before the database notices.',
-        'Led a team of four through the migration with zero dropped jobs.'
-      ],
-      stack: ['Go', 'Postgres', 'gRPC', 'Kubernetes', 'Grafana'],
-      link: { label: 'Read the write-up', href: 'https://example.com' } },
-    { id: 'tidepool', name: 'Tidepool', year: 2023, kind: 'Real-time ocean data map', role: 'Side project', status: 'Live', art: 'waves',
-      summary: 'Streams readings from 900 ocean buoys onto a WebGL map, so surfers and sailors can watch swell, wind and water temperature update as it happens.',
-      stats: [['900', 'live buoys'], ['60 fps', 'on a 2019 phone'], ['3.1k', 'monthly visitors']],
-      highlights: [
-        'Tiled and delta-encoded the feed to fit 900 stations into 40 KB per update.',
-        'Rendered swell direction as an instanced particle field in WebGL2.',
-        "Featured in a sailing club newsletter, which I'm prouder of than I should be."
-      ],
-      stack: ['TypeScript', 'WebGL2', 'Python', 'FastAPI', 'Redis'],
-      link: { label: 'tidepool.example.com', href: 'https://example.com' } },
-    { id: 'hexkit', name: 'Hexkit', year: 2022, kind: 'Open-source scaffolder', role: 'Maintainer', status: 'Open source', art: 'terminal',
-      summary: 'A Rust CLI that generates production-ready service templates, with logging, config, CI and Docker included, in under a second.',
-      stats: [['2.1k', 'GitHub stars'], ['48', 'contributors'], ['0.8 s', 'to a new project']],
-      highlights: [
-        'Template engine with typed variables and a dry-run diff before anything is written.',
-        'Plugin system on WASM so teams can ship their own generators.',
-        'Reviewed and merged 300+ community pull requests.'
-      ],
-      stack: ['Rust', 'WASM', 'Tera', 'GitHub Actions'],
-      link: { label: 'github.com/jordanvale/hexkit', href: 'https://github.com' } },
-    { id: 'ledgerline', name: 'Ledgerline', year: 2021, kind: 'Payments reconciliation', role: 'Backend engineer', status: 'Shipped at Parcel & Pine', art: 'ledger',
-      summary: "Matches every payout against bank statements overnight and flags the handful that don't add up, replacing a spreadsheet three people used to maintain.",
-      stats: [['$1.2B', 'reconciled per year'], ['99.7%', 'auto-matched'], ['9 min', 'nightly run, was 6 h']],
-      highlights: [
-        'Built a rules engine the finance team edits without a deploy.',
-        'Parallelized matching by merchant, taking the nightly run from six hours to nine minutes.',
-        'Added an audit trail that passed SOC 2 review on the first try.'
-      ],
-      stack: ['Kotlin', 'Postgres', 'Kafka', 'dbt'],
-      link: { label: 'Case study', href: 'https://example.com' } }
+    { id: 'searchless-chess', name: 'Searchless Chess', year: 2026, kind: 'Mechanistic interpretability', role: 'Research project', status: 'Research', art: 'orbit',
+      summary: "Probed DeepMind's 270M-parameter Searchless Chess transformer to study what it represents about the board and where those representations appear.",
+      stats: [['136', 'linear probes'], ['5,488', 'positions'], ['17', 'layers']],
+      highlights: ['Tested eight chess concepts across all 17 layers.', 'Recovered material balance with R² = 0.999 and center control with R² = 0.989 from layer activations.', 'Built a Chrome extension and WebSocket pipeline to visualize move preferences during post-game analysis.'],
+      stack: ['Python', 'JAX', 'Scikit-learn', 'WebSockets', 'Chrome Extensions'],
+      link: { label: 'Explore my GitHub', href: 'https://github.com/Shane12344321' } },
+    { id: 'hybrid-job-hunter', name: 'Hybrid Job Hunter', year: 2026, kind: 'Job monitoring automation', role: 'Builder', status: 'Open source', art: 'terminal',
+      summary: 'Monitors career pages through structured APIs and browser automation, with scheduled runs and per-source fault tracking.',
+      stats: [['7', 'career platforms'], ['2', 'adapter modes']],
+      highlights: ['Built adapters for seven ATS and career platforms, including JavaScript-rendered sites.', 'Added per-source health tracking, request budgets, and queued retries.', 'Runs on a schedule with GitHub Actions and no dedicated server.'],
+      stack: ['Python', 'Playwright', 'GitHub Actions', 'Telegram API'],
+      link: { label: 'View repository', href: 'https://github.com/Shane12344321/hybrid-job-hunter' } },
+    { id: 'noteforge', name: 'NoteForge', year: 2026, kind: 'AI-assisted banking QA', role: 'AI Intern, South Indian Bank', status: 'Internship project', art: 'pages',
+      summary: 'Turns banking business requirements into structured, traceable test cases for QA workflows.',
+      stats: [],
+      highlights: ['Built the generation workflow with FastAPI, Pydantic, and LLM-based generation.', 'Validated test cases against digital banking flows covering identity verification, core banking, and real-time payments.'],
+      stack: ['Python', 'FastAPI', 'Pydantic', 'LLMs'],
+      link: { label: 'View repository', href: 'https://github.com/Shane12344321/NoteForge' } },
+    { id: 'aspf', name: 'Adaptive Shortest-Path Framework', year: 2026, kind: 'Algorithm selection', role: 'Builder', status: 'Research project', art: 'ledger',
+      summary: 'Selects among BFS, Dijkstra, and Dial algorithms at runtime using structural features of a graph.',
+      stats: [['88%', 'held-out selection accuracy'], ['up to 73%', 'faster on sparse graphs']],
+      highlights: ['Trained a Random Forest classifier to choose the fastest shortest-path algorithm.', 'Measured up to 73% faster execution than fixed Dijkstra on sparse graphs and 58% on uniform-weight graphs.'],
+      stack: ['C++', 'Python', 'Scikit-learn', 'NetworkX'],
+      link: { label: 'Explore my GitHub', href: 'https://github.com/Shane12344321' } },
+    { id: 'chalk', name: 'CHALK', year: 2026, kind: 'Conversational whiteboard prototype', role: 'Builder', status: 'Open source prototype', art: 'waves',
+      summary: 'An experimental voice-driven whiteboard that turns a conversation into structured, validated drawing instructions.',
+      stats: [],
+      highlights: ['Separates the voice conversation from generation of board instructions.', 'Validates drawing instructions before rendering them on the board.'],
+      stack: ['Realtime voice', 'Structured generation', 'Web'],
+      link: { label: 'Explore CHALK', href: 'https://shanesarosh.xyz/chalk/' } }
   ],
-
   work: [
-    { company: 'Northwind Labs', title: 'Senior Software Engineer', dates: '2023 – now', place: 'New York', team: 'Platform',
-      summary: 'Own the job scheduling and eventing platform every product team at Northwind builds on.',
-      points: ['Tech lead for Orbit, the scheduler handling 40M jobs a day.', 'Cut p99 API latency 48% by reworking connection pooling across 30 services.', 'Mentor four engineers and run the backend interview loop.'],
-      stack: ['Go', 'Postgres', 'Kubernetes', 'gRPC'] },
-    { company: 'Parcel & Pine', title: 'Software Engineer', dates: '2020 – 2023', place: 'Remote', team: 'Payments',
-      summary: 'Early engineer on payments for an e-commerce platform that grew from 200 to 9,000 merchants.',
-      points: ['Built Ledgerline, the reconciliation engine behind every payout.', 'Moved card processing to a second provider with no downtime.', 'Wrote on-call runbooks that halved incident resolution time.'],
-      stack: ['Kotlin', 'Kafka', 'Postgres', 'AWS'] },
-    { company: 'Bluefin Systems', title: 'Engineering Intern', dates: 'Summer 2019', place: 'Boston', team: 'Developer tools',
-      summary: 'Worked on build tooling for a 400-engineer monorepo.',
-      points: ['Added remote caching to the build; median CI time fell from 22 to 9 minutes.', "Wrote a flaky-test detector that, I'm told, is still running."],
-      stack: ['Python', 'Bazel', 'Go'] }
+    { company: 'South Indian Bank', title: 'AI Intern', dates: 'May – Jun 2026', place: 'Kochi, India', team: 'AI',
+      summary: 'Built NoteForge, an AI-assisted platform for turning banking requirements into traceable QA test cases.',
+      points: ['Developed the requirements-to-test-case workflow with FastAPI, Pydantic, and LLM-based generation.', 'Validated against eKYC, core-banking integration, payment limits, and failure handling across UPI, IMPS, NEFT, and RTGS.'],
+      stack: ['Python', 'FastAPI', 'Pydantic', 'LLMs'] }
   ],
-  education: { school: 'Northfield University', degree: 'B.S. Computer Science', dates: '2016 – 2020',
-    notes: ['Minor in Mathematics', 'Teaching assistant, Operating Systems', 'Thesis: consistency models for mobile sync'] },
-
-  // [name, comfort 0–100, note]
+  education: { school: 'Vellore Institute of Technology (VIT)', degree: 'B.Tech, Computer Science and Engineering', dates: 'Aug 2024 – May 2028',
+    notes: ['Vellore, India', 'CGPA: 8.79/10 (as listed on my résumé)'] },
   skills: {
-    Languages: { blurb: 'What I reach for, roughly in order of how often.',
-      items: [['TypeScript', 95, '7 years'], ['Go', 88, '4 years'], ['SQL', 90, '7 years'], ['Rust', 74, '3 years'], ['Kotlin', 70, '3 years'], ['Python', 80, '8 years']] },
-    Systems: { blurb: "The parts of a stack I'm happiest being paged for.",
-      items: [['Postgres', 92, 'tuning, HA'], ['Kafka', 75, 'streams'], ['Kubernetes', 78, 'operators'], ['gRPC', 82, 'service mesh'], ['Redis', 80, 'caching'], ['WebSockets', 85, 'realtime']] },
-    Toolbox: { blurb: 'Day-to-day tools and practices.',
-      items: [['Observability', 86, 'Grafana, OTel'], ['CI/CD', 84, 'GH Actions'], ['Profiling', 78, 'pprof, perf'], ['Testing', 88, 'property, fuzz'], ['Design docs', 90, 'RFC culture'], ['Mentoring', 85, '4 mentees']] }
+    Languages: { blurb: 'Languages listed on my résumé.', items: ['Python', 'C++', 'JavaScript', 'LaTeX'] },
+    'ML & Interpretability': { blurb: 'Methods and libraries used in my projects.', items: ['JAX', 'Scikit-learn', 'Linear probing', 'NetworkX'] },
+    'Tools & Infra': { blurb: 'Tools used across my research and engineering work.', items: ['FastAPI', 'Pydantic', 'Playwright', 'GitHub Actions', 'Git', 'WebSockets', 'Chrome Extensions', 'Telegram API'] }
   },
-  learning: ['Zig, by rewriting a toy key-value store', 'Formal methods with TLA+', 'Analog electronics, for restoring this Mac'],
-
+  learning: ['Mechanistic interpretability', 'Interactive learning tools', 'Reliable AI-assisted software'],
   contact: {
-    email: 'hello@jordanvale.dev',
-    github: { label: 'github.com/jordanvale', href: 'https://github.com' },
-    linkedin: { label: 'linkedin.com/in/jordanvale', href: 'https://www.linkedin.com' },
-    availability: 'Open to senior and staff roles in platform or developer tooling, plus short contract work. I usually reply within two days.'
+    email: 'shanesarosh@gmail.com',
+    github: { label: 'github.com/Shane12344321', href: 'https://github.com/Shane12344321' },
+    linkedin: { label: 'linkedin.com/in/shanesarosh', href: 'https://www.linkedin.com/in/shanesarosh' },
+    availability: 'Open to conversations about AI research, software engineering, and interesting projects. Email me to get in touch.'
   },
-  repos: [['hexkit', 'Scaffold services in under a second', 2140], ['tidepool', 'Live ocean buoy map', 412], ['pgqueue', 'Lease-based job queue on Postgres', 388], ['crdt-notes', 'Tiny CRDT playground', 156]]
+  repos: [
+    ['Hybrid Job Hunter', 'Career-page monitoring pipeline', 'https://github.com/Shane12344321/hybrid-job-hunter'],
+    ['NoteForge', 'AI-assisted QA test-case generation', 'https://github.com/Shane12344321/NoteForge'],
+    ['CHALK', 'Conversational whiteboard prototype', 'https://github.com/Shane12344321/chalk2']
+  ]
 };
 /* ───────── Helpers ───────── */
 const $ = (s, r = document) => r.querySelector(s);
@@ -1461,7 +1425,8 @@ V('resume', { title: 'Résumé', w: 470, h: 350, render(c) {
     <h3>Education</h3>
     <div class="row2"><b>${esc(C.education.degree)}, ${esc(C.education.school)}</b><span>${esc(C.education.dates)}</span></div>
     <h3>Skills</h3>
-    <p>${Object.values(C.skills).flatMap(s => s.items.map(i => i[0])).map(esc).join(' · ')}</p>`;
+    <p>${Object.values(C.skills).flatMap(s => s.items).map(esc).join(' · ')}</p>
+    <div class="actions">${ext('https://shanesarosh.xyz/resume.pdf', 'Open full PDF résumé')}</div>`;
 } });
 
 C.projects.forEach(p => V('project-' + p.id, { title: p.name, w: 460, h: 340, render(c) {
@@ -1469,7 +1434,7 @@ C.projects.forEach(p => V('project-' + p.id, { title: p.name, w: 460, h: 340, re
     <h2>${esc(p.name)}</h2><div class="sub">${esc(p.kind)}</div>
     <div class="meta"><span>${p.year}</span><span>${esc(p.role)}</span><span>${esc(p.status)}</span></div>
     <p>${esc(p.summary)}</p>
-    <div class="stats">${p.stats.map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('')}</div>
+    ${p.stats.length ? `<div class="stats">${p.stats.map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('')}</div>` : ''}
     <h3>Highlights</h3>${bullets(p.highlights)}
     <h3>Built with</h3>${tags(p.stack)}
     <div class="actions">${ext(p.link.href, p.link.label)}</div>`;
@@ -1510,13 +1475,11 @@ V('education', { title: 'Education', w: 380, h: 210, render(c) {
 } });
 
 Object.entries(C.skills).forEach(([cat, s]) => V('skills-' + slug(cat), { title: cat, w: 400, h: 270, render(c) {
-  c.innerHTML = `<p>${esc(s.blurb)}</p>
-    <div class="bars">${s.items.map(([n, v, note]) => `<div class="b"><span>${esc(n)}</span><div class="bar" role="img" aria-label="${esc(n)}: ${v} out of 100"><i style="--v:${v}%"></i></div><span class="yrs">${esc(note || '')}</span></div>`).join('')}</div>
-    <p class="note">Bars show comfort, not years.</p>`;
+  c.innerHTML = `<p>${esc(s.blurb)}</p>${tags(s.items)}`;
 } }));
 
-V('learning', { title: 'Currently Learning', w: 340, h: 190, render(c) {
-  c.innerHTML = `<p>What's on the desk right now:</p>${bullets(C.learning)}`;
+V('learning', { title: 'Areas of Interest', w: 340, h: 190, render(c) {
+  c.innerHTML = `<p>Topics I keep coming back to:</p>${bullets(C.learning)}`;
 } });
 
 async function copyEmail(noteEl) {
@@ -1543,15 +1506,12 @@ V('contact', { title: 'Contact Card', w: 380, h: 270, render(c) {
   });
 } });
 
-V('github', { title: 'GitHub Activity', w: 440, h: 310, render(c) {
-  c.innerHTML = `<div class="sub">${esc(C.contact.github.label)}</div><canvas class="heat" aria-hidden="true"></canvas>
-    <div class="note contrib"></div>
-    <h3>Pinned</h3>
-    <table class="list"><thead><tr><th>Repository</th><th>About</th><th class="num">Stars</th></tr></thead>
-    <tbody>${C.repos.map(([n, d, s]) => `<tr><td><b>${esc(n)}</b></td><td>${esc(d)}</td><td class="num">${s.toLocaleString('en-US')}</td></tr>`).join('')}</tbody></table>
+V('github', { title: 'GitHub Profile', w: 440, h: 310, render(c) {
+  c.innerHTML = `<div class="sub">${esc(C.contact.github.label)}</div>
+    <h3>Selected repositories</h3>
+    <table class="list"><thead><tr><th>Repository</th><th>About</th></tr></thead>
+    <tbody>${C.repos.map(([n, d, href]) => `<tr><td>${ext(href, n, 'lnk')}</td><td>${esc(d)}</td></tr>`).join('')}</tbody></table>
     <div class="actions">${ext(C.contact.github.href, 'Open GitHub')}</div>`;
-  const total = drawHeat(c.querySelector('canvas'));
-  c.querySelector('.contrib').textContent = `${total.toLocaleString('en-US')} contributions in the last year`;
 } });
 
 V('about-portfolio', { title: 'About This Portfolio', w: 390, h: 250, fixed: true, render(c) {
@@ -1566,7 +1526,7 @@ V('notepad', { title: 'Note Pad', w: 300, h: 220, render(c) {
   c.classList.add('flush');
   c.innerHTML = '<textarea class="np" id="notepad" aria-label="Note Pad" spellcheck="false"></textarea>';
   const t = c.firstChild;
-  t.value = store.get('notepad', 'Notes you type here stay in this browser.\n\nTry Projects ▸ Slate next.');
+  t.value = store.get('notepad', 'Notes you type here stay in this browser.\n\nTry Projects ▸ Searchless Chess next.');
   t.addEventListener('input', () => store.set('notepad', t.value));
 } });
 
@@ -1634,14 +1594,14 @@ WM.setMenus([
     { label: 'Timeline…', key: 'T', act: go('timeline') }, { label: 'Education…', act: go('education') }] },
   { title: 'Skills', items: [
     ...Object.keys(C.skills).map(k => ({ label: k + '…', act: go('skills-' + slug(k)) })), '-',
-    { label: 'Currently Learning…', act: go('learning') }] },
+    { label: 'Areas of Interest…', act: go('learning') }] },
   { title: 'Contact', items: [
     { label: 'Contact Card…', key: 'K', act: go('contact') },
     { label: 'Copy Email Address', act: async () => {
       const ok = await copyEmail();
       WM.alert({ icon: 'note', html: ok ? `Copied <b>${esc(C.contact.email)}</b> to the clipboard.` : `Couldn't reach the clipboard. The address is <b>${esc(C.contact.email)}</b>.` });
     } }, '-',
-    { label: 'GitHub Activity…', key: 'G', act: go('github') }, { label: 'Availability…', act: () => WM.alert({ icon: 'note', html: `<b>Availability</b><br>${esc(C.contact.availability)}` }) }] },
+    { label: 'GitHub Profile…', key: 'G', act: go('github') }, { label: 'Availability…', act: () => WM.alert({ icon: 'note', html: `<b>Availability</b><br>${esc(C.contact.availability)}` }) }] },
   { title: 'Special', items: [
     { label: 'Clean Up Windows', act: () => WM.cleanUp(), enabled: () => WM.count() > 0 }, '-',
     { label: 'Step Back', key: '.', act: () => setZoom(false), enabled: () => !view.mobile }, '-',
