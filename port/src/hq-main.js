@@ -10,13 +10,15 @@ function buildHQ() {
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false; // nothing that casts a shadow moves unless a key or the mouse is pressed
+  renderer.shadowMap.needsUpdate = true;
   G.dpr = Math.min(devicePixelRatio || 1, 1.75);
 
   const scene = G.scene = new THREE.Scene();
   scene.background = new THREE.Color('#040504');
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.16;
+  scene.environment = pmrem.fromScene(roomReflections(), 0.02, 0.005, 20).texture;
+  scene.environmentIntensity = 1;
   pmrem.dispose();
   RectAreaLightUniformsLib.init();
 
@@ -31,15 +33,10 @@ function buildHQ() {
   makeMaterials();
   buildRoom(); buildMac(); buildKeyboard(); buildMouse(); buildLamp(); buildPlant(); buildMug(); buildFloppies(); buildPoster(); buildLights();
 
-  const comp = G.composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
-  comp.addPass(new RenderPass(scene, cam));
-  comp.addPass(new ShaderPass({
-    uniforms: { tDiffuse: { value: null } }, vertexShader: VS_UV,
-    fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); if(any(isnan(c))||any(isinf(c))) c=vec4(0.,0.,0.,1.); gl_FragColor=vec4(min(c.rgb,vec3(64.)),1.); }'
-  }));
-  G.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 1.05);
+  const comp = G.composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }));
+  comp.addPass(scenePass(scene, cam));
+  G.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.34, 0.42, 0.96);
   comp.addPass(G.bloom);
-  comp.addPass(new OutputPass());
   G.finalPass = new ShaderPass(finalShader());
   comp.addPass(G.finalPass);
 
@@ -50,23 +47,29 @@ function buildHQ() {
   HQ.power(power === 'on');
 }
 
-(async () => {
+/* Phones never show the room, so three.js is only fetched once the window is wide enough to use it */
+function whenWide(load) {
+  if (!view.mobile) return load();
+  addEventListener('resize', function grow() { if (!view.mobile) { removeEventListener('resize', grow); load(); } });
+}
+whenWide(async () => {
   try {
     const A = 'three/addons/';
-    const m = await Promise.all(['three', A + 'geometries/RoundedBoxGeometry.js', A + 'postprocessing/EffectComposer.js', A + 'postprocessing/RenderPass.js',
-      A + 'postprocessing/UnrealBloomPass.js', A + 'postprocessing/ShaderPass.js', A + 'postprocessing/OutputPass.js',
-      A + 'lights/RectAreaLightUniformsLib.js', A + 'environments/RoomEnvironment.js'].map(s => import(s)));
+    const m = await Promise.all(['three', A + 'geometries/RoundedBoxGeometry.js', A + 'postprocessing/EffectComposer.js', A + 'postprocessing/Pass.js',
+      A + 'postprocessing/UnrealBloomPass.js', A + 'postprocessing/ShaderPass.js', A + 'lights/RectAreaLightUniformsLib.js'].map(s => import(s)));
     THREE = m[0];
-    ({ RoundedBoxGeometry } = m[1]); ({ EffectComposer } = m[2]); ({ RenderPass } = m[3]); ({ UnrealBloomPass } = m[4]);
-    ({ ShaderPass } = m[5]); ({ OutputPass } = m[6]); ({ RectAreaLightUniformsLib } = m[7]); ({ RoomEnvironment } = m[8]);
+    ({ RoundedBoxGeometry } = m[1]); ({ EffectComposer } = m[2]); ({ FullScreenQuad } = m[3]); ({ UnrealBloomPass } = m[4]);
+    ({ ShaderPass } = m[5]); ({ RectAreaLightUniformsLib } = m[6]);
     await Promise.all([document.fonts.load('italic 40px "Instrument Serif"'), document.fonts.load('500 20px "IBM Plex Mono"')]).catch(() => {});
     buildHQ();
     requestAnimationFrame(tick);
     syncGfxBtn();
     layout(false);
+    requestAnimationFrame(lightsUp);
   } catch (e) {
     console.warn('High graphics mode is unavailable:', e);
     HQ.failed = true;
     syncGfxBtn();
+    lightsUp();
   }
-})();
+});

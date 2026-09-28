@@ -11,7 +11,7 @@ const store = {
 };
 const prefs = Object.assign({ pattern: 'gray', sound: true, scan: true, gfx: 'high', music: true }, store.get('prefs', {}));
 /* Filled in by the high-graphics module once three.js loads */
-const HQ = { ready: false, on: false, failed: false, setActive() {}, layout() {}, power() {}, key() {}, mouse() {} };
+const HQ = { ready: false, on: false, failed: false, setActive() {}, layout() {}, lightsUp() {}, power() {}, key() {}, mouse() {} };
 const savePrefs = () => store.set('prefs', prefs);
 
 /* ───────── 1-bit sprites ('#' black, '.' white, ' ' clear) ───────── */
@@ -157,6 +157,13 @@ function toInner(rect) {
   const r = inner.getBoundingClientRect(), k = scrScale();
   return { x: (rect.left - r.left) / k, y: (rect.top - r.top) / k, w: rect.width / k, h: rect.height / k };
 }
+
+/* ───────── Opening: the room stays dark until the first view is ready ───────── */
+function lightsUp() {
+  if (document.body.classList.contains('lit')) return;
+  document.body.classList.add('lit'); HQ.lightsUp();
+}
+setTimeout(lightsUp, 2600);
 
 /* ───────── Power ───────── */
 let power = 'off', welcomed = false;

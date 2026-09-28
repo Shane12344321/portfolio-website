@@ -1,5 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Shane Sarosh's Macintosh</title>
+<meta name="theme-color" content="#030403">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect x='2' width='12' height='14' rx='1.5' fill='%23e6dec8'/%3E%3Crect x='3' y='14' width='10' height='2' fill='%23b3a88f'/%3E%3Crect x='4' y='2' width='8' height='7' fill='%23101210'/%3E%3Crect x='5' y='3' width='6' height='5' fill='%23f4f6fb'/%3E%3Cpath d='M6 4h1v1H6zM9 4h1v1H9zM6 6h1v1H6zM9 6h1v1H9zM7 7h2v1H7z' fill='%23101210'/%3E%3Crect x='8' y='11' width='4' height='1' fill='%233a352c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Pixelify+Sans:wght@400;500;600;700&family=VT323&display=swap">
@@ -91,7 +93,19 @@ body.zoomed .placard{opacity:0;transform:translateY(10px);pointer-events:none}
 .hud button:focus-visible{outline:2px solid var(--hud-ink);outline-offset:2px}
 body:not(.zoomed) #btn-back{display:none}
 
-@media (prefers-reduced-motion:reduce){.placard .cta::before{animation:none}}
+/* Opening: the room fades up from black once the first view is ready (and on its own after 4s, without JS) */
+.veil{position:fixed;inset:0;z-index:40;background:#030403;pointer-events:none;transition:opacity 1.5s cubic-bezier(.4,0,.2,1),visibility 0s 1.5s;animation:veil-late 0s 4s forwards}
+body.lit .veil{opacity:0;visibility:hidden}
+.veil::after{content:"Switching on the lamp…";position:absolute;left:0;right:0;top:50%;text-align:center;font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:rgba(235,232,224,.4);opacity:0;animation:hint .8s 1.4s forwards}
+body.lit .veil::after{animation-play-state:paused}
+@keyframes hint{to{opacity:1}}
+body.lit .placard{animation:rise .9s cubic-bezier(.2,.7,.2,1) .7s backwards}
+body.lit .hud{animation:fade .8s ease 1s backwards}
+@keyframes veil-late{to{opacity:0;visibility:hidden}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+@keyframes fade{from{opacity:0}}
+
+@media (prefers-reduced-motion:reduce){.placard .cta::before{animation:none}body.lit .placard,body.lit .hud{animation-name:fade}}
 /* ───────── The studio: evening, lamp on ───────── */
 body{background:#18201b}
 body::after{content:"";position:fixed;inset:0;z-index:6;pointer-events:none;background:radial-gradient(120% 95% at 50% 42%,transparent 52%,rgba(6,8,7,.55));transition:opacity 1s}
@@ -159,10 +173,18 @@ html.mobile .wall,html.mobile .window,html.mobile .sill,html.mobile .poster,html
 .inner.crt-off{animation:crt-off .6s ease-in both}
 @keyframes crt-on{0%{transform:scale(.3,.004);filter:brightness(5)}35%{transform:scale(1,.004);filter:brightness(4)}100%{transform:none;filter:none}}
 @keyframes crt-off{0%{transform:none;filter:none}55%{transform:scale(1,.004);filter:brightness(4)}100%{transform:scale(0,.004);filter:brightness(6);opacity:0}}
-.power-hint{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:rgba(225,235,225,.5);font:500 13px var(--mono);letter-spacing:.14em;text-transform:uppercase}
-.fx{position:absolute;inset:0;z-index:100;pointer-events:none;border-radius:inherit;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.075) 0 1px,transparent 1px 3px);box-shadow:inset 0 0 38px rgba(0,0,0,.3),inset 0 0 5px rgba(0,0,0,.5)}
+.power-hint{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
+.ph{display:grid;justify-items:center;gap:8px;padding:0 28px 40px;text-align:center;color:#efe9dc;-webkit-font-smoothing:antialiased}
+.ph-mac{width:80px;height:80px;margin-bottom:18px;filter:drop-shadow(0 14px 30px rgba(255,160,80,.28))}
+.ph-name{font:italic 400 38px/1 var(--serif);letter-spacing:-.01em}
+.ph-role{font:italic 400 17px/1.3 var(--serif);color:rgba(239,233,220,.62);text-wrap:balance}
+.ph-cta{display:flex;gap:10px;align-items:center;margin-top:26px;font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:rgba(239,233,220,.78)}
+.ph-cta::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(196,67,47,.18);animation:pulse 1.8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.ph-cta::before{animation:none}}
+/* The tube: multiplied over the picture, a faintly blue-white phosphor that falls off toward the corners, plus scanlines */
+.fx{--tube:radial-gradient(ellipse 82% 78% at 50% 47%,#f5f8fd 56%,#dde1ea 92%,#cfd3de);position:absolute;inset:0;z-index:100;pointer-events:none;border-radius:inherit;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.075) 0 1px,transparent 1px 3px),var(--tube);box-shadow:inset 0 0 38px rgba(0,0,0,.3),inset 0 0 5px rgba(0,0,0,.5)}
 #screen:not(.on) .fx{display:none}
-body.noscan .fx{background:none}
+body.noscan .fx{background:var(--tube)}
 
 /* Menu bar + menus */
 .menubar{position:absolute;left:0;right:0;top:0;height:20px;z-index:30;display:flex;align-items:stretch;padding:0 8px;background:#fff;border-bottom:1px solid #000;user-select:none;-webkit-user-select:none;touch-action:none}
@@ -308,7 +330,7 @@ html.mobile #stage{transform:none!important;width:100%;height:100%}
 html.mobile .desk,html.mobile .shadow,html.mobile .cord,html.mobile .mac-lid,html.mobile .mac-face,html.mobile .mac-foot,html.mobile .kbd-wrap,html.mobile .mouse-wrap,html.mobile .placard,html.mobile .hit,html.mobile .glass::after{display:none}
 html.mobile .bezel{border:0}
 html.mobile .glass{background:none;box-shadow:none}
-html.mobile #screen{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);width:auto;height:auto;border-radius:0;background:radial-gradient(#2b2c2a,#0e0e0d)}
+html.mobile #screen{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);width:auto;height:auto;border-radius:0;background:radial-gradient(130% 75% at 50% 36%,#3d2a1d,#140e0a 60%,#070605)}
 html.mobile #screen.on{background:#000}
 html.mobile #screen:not(.on) .power-hint{display:flex}
 html.mobile .menubar{padding:0 2px}
@@ -318,6 +340,7 @@ html.mobile body.zoomed .hud{display:none}
 /* ───────── High graphics layer ───────── */
 #hq{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:0;pointer-events:none;outline:none;transition:opacity .9s ease}
 body.hq #hq{opacity:1;pointer-events:auto}
+body:not(.lit) #hq{transition:none}
 body.hq:not(.zoomed) #hq{cursor:pointer}
 #hq:focus-visible{box-shadow:inset 0 0 0 2px var(--hud-ink)}
 #hq-screen{position:fixed;left:0;top:0;z-index:2;width:640px;height:428px;transform-origin:0 0;pointer-events:none}
@@ -372,7 +395,12 @@ html.mobile #btn-gfx{display:none}
       <div class="mac-foot"></div>
       <div class="bezel"><div class="glass">
         <div id="screen">
-          <div class="power-hint">Tap to switch on</div>
+          <div class="power-hint"><div class="ph">
+            <svg class="ph-mac" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" width="12" height="14" rx="1.5" fill="#e6dec8"/><rect x="3" y="14" width="10" height="2" fill="#b3a88f"/><rect x="4" y="2" width="8" height="7" fill="#101210"/><rect x="5" y="3" width="6" height="5" fill="#f4f6fb"/><path d="M6 4h1v1H6zM9 4h1v1H9zM6 6h1v1H6zM9 6h1v1H9zM7 7h2v1H7z" fill="#101210"/><rect x="8" y="11" width="4" height="1" fill="#3a352c"/></svg>
+            <div class="ph-name" id="ph-name">Shane Sarosh</div>
+            <div class="ph-role" id="ph-role"></div>
+            <div class="ph-cta">Tap to switch on</div>
+          </div></div>
           <div class="inner" id="inner">
             <nav class="menubar" id="menubar" aria-label="Menu bar"></nav>
             <div class="desktop" id="desktop">
@@ -445,6 +473,7 @@ html.mobile #btn-gfx{display:none}
   <button type="button" id="btn-music" aria-pressed="true">Music on</button>
   <button type="button" id="btn-sound" aria-pressed="true">Effects on</button>
 </div>
+<div class="veil" aria-hidden="true"></div>
 <script>
 /* Content grounded in Shane's public résumé and portfolio. */
 const C = {
@@ -535,7 +564,7 @@ const store = {
 };
 const prefs = Object.assign({ pattern: 'gray', sound: true, scan: true, gfx: 'high', music: true }, store.get('prefs', {}));
 /* Filled in by the high-graphics module once three.js loads */
-const HQ = { ready: false, on: false, failed: false, setActive() {}, layout() {}, power() {}, key() {}, mouse() {} };
+const HQ = { ready: false, on: false, failed: false, setActive() {}, layout() {}, lightsUp() {}, power() {}, key() {}, mouse() {} };
 const savePrefs = () => store.set('prefs', prefs);
 
 /* ───────── 1-bit sprites ('#' black, '.' white, ' ' clear) ───────── */
@@ -681,6 +710,13 @@ function toInner(rect) {
   const r = inner.getBoundingClientRect(), k = scrScale();
   return { x: (rect.left - r.left) / k, y: (rect.top - r.top) / k, w: rect.width / k, h: rect.height / k };
 }
+
+/* ───────── Opening: the room stays dark until the first view is ready ───────── */
+function lightsUp() {
+  if (document.body.classList.contains('lit')) return;
+  document.body.classList.add('lit'); HQ.lightsUp();
+}
+setTimeout(lightsUp, 2600);
 
 /* ───────── Power ───────── */
 let power = 'off', welcomed = false;
@@ -1613,20 +1649,22 @@ $('#icon-disk img').src = SPR.disk;
 $('#icon-trash img').src = SPR.trash;
 WM.iconBehavior('icon-disk', () => WM.alert({ icon: 'note', html: `The <b>Portfolio</b> disk opens from the menu bar. Try <b>Projects</b>, or <b>File ▸ About Me</b>.`, buttons: [{ label: 'OK' }, { label: 'Open Projects', def: true, act: () => WM.openMenuByTitle('Projects') }] }));
 WM.iconBehavior('icon-trash', () => WM.alert({ icon: 'caution', html: 'The Trash is empty. Everything here shipped.' }));
-$('#plac-name').textContent = C.name;
-$('#plac-role').textContent = C.role;
+$('#plac-name').textContent = $('#ph-name').textContent = C.name;
+$('#plac-role').textContent = $('#ph-role').textContent = C.role;
 screenEl.style.cursor = `url("${SPR.arrow}") 1 1, default`;
 applyPrefs();
 updatePlacard();
 layout(false);
+if (view.mobile || prefs.gfx !== 'high') requestAnimationFrame(lightsUp);
 </script>
 <script type="module">
 /* ───────── High graphics: a physically lit WebGL studio (three.js) ─────────
    The Mac's screen stays real HTML. The 3D camera never rotates, only moves
    and shifts its lens, so the CRT always projects to an upright rectangle
    and the HTML screen can be pinned onto it with a plain 2D transform. */
-let THREE, RoundedBoxGeometry, EffectComposer, RenderPass, UnrealBloomPass, ShaderPass, OutputPass, RectAreaLightUniformsLib, RoomEnvironment;
-const G = { cur: null, anim: null, frame: 0, perf: [], dpr: 1, w: 0, h: 0, t: 0, glow: 0, screenOn: false, keys: new Map() };
+let THREE, RoundedBoxGeometry, EffectComposer, FullScreenQuad, UnrealBloomPass, ShaderPass, RectAreaLightUniformsLib;
+const G = { cur: null, anim: null, perf: [], dpr: 1, w: 0, h: 0, t: 0, glow: 0, zoomDim: 1, lamp: 0, litAt: 0, hover: 0, ptr: null, screenOn: false, dirty: true, keys: new Map(),
+  par: { x: 0, y: 0, tx: 0, ty: 0, w: 0, on: !reduceMotion && matchMedia('(hover: hover) and (pointer: fine)').matches } };
 const U = { time: { value: 0 } };
 const hqWrap = document.createElement('div');
 hqWrap.id = 'hq-screen';
@@ -1651,6 +1689,7 @@ function procMat(mat, o) {
       .replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWP=(modelMatrix*vec4(transformed,1.)).xyz;');
     let f = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;\n' + GLSL_NOISE);
+    if (o.pre) f = f.replace('void main() {', `void main() {\n  vec3 pW=vWP; ${o.pre}`);
     if (o.albedo) f = f.replace('#include <map_fragment>', `#include <map_fragment>\n{ vec3 p=vWP; ${o.albedo} }`);
     if (o.rough) f = f.replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\n{ vec3 p=vWP; ${o.rough} }`);
     if (o.bump) f = f.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -1738,6 +1777,14 @@ function zoomState() {
 }
 const lerpState = (A, B, e) => { const o = {}; for (const k in A) o[k] = A[k] + (B[k] - A[k]) * e; return o; };
 const easeIO = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+/* Parallax: the pointer slides the camera a few centimetres and the lens shifts back,
+   so the Mac's front stays pinned while the keyboard and the wall drift apart */
+const PAR = { x: 0.05, y: 0.022, f: 0.96 };
+function withParallax(s) {
+  const P = G.par, dx = P.x * PAR.x * P.w, dy = -P.y * PAR.y * P.w;
+  if (!dx && !dy) return s;
+  return { x: s.x + dx, y: s.y + dy, z: s.z, l: s.l - dx / PAR.f, r: s.r - dx / PAR.f, t: s.t - dy / PAR.f, b: s.b - dy / PAR.f };
+}
 function applyCamera(s) {
   const c = G.camera;
   c.position.set(s.x, s.y, s.z);
@@ -1751,7 +1798,8 @@ function placeScreen() {
   const px = (v.x * 0.5 + 0.5) * G.w, py = (-v.y * 0.5 + 0.5) * G.h;
   v.set(x + G.SW / 2, y - G.SH / 2, z).project(G.camera);
   const s = ((v.x * 0.5 + 0.5) * G.w - px) / 640;
-  hqWrap.style.transform = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${s.toFixed(5)})`;
+  const tf = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${s.toFixed(5)})`;
+  if (tf !== G.tf) hqWrap.style.transform = G.tf = tf;
 }
 function resize() {
   G.w = innerWidth; G.h = innerHeight;
@@ -1761,17 +1809,55 @@ function resize() {
   G.composer.setSize(G.w, G.h);
   G.finalPass.uniforms.res.value.set(G.w * G.dpr, G.h * G.dpr);
   G.dust.material.uniforms.px.value = 1.4 * G.dpr;
+  G.dirty = true;
 }
 
 /* ───────── Frame loop ───────── */
-function updateLights(dt) {
-  G.glow += ((G.screenOn ? 1 : 0) - G.glow) * Math.min(1, dt * 5);
-  const f = (1 + (Math.random() - 0.5) * 0.035) * (G.zoomDim = (G.zoomDim ?? 1) + ((view.zoomed ? 0.45 : 1) - (G.zoomDim ?? 1)) * Math.min(1, dt * 3));
-  G.screenLight.intensity = 3 * G.glow * f;
-  G.glowMat.color.setRGB(1.7 * G.glow * f, 1.8 * G.glow * f, 1.78 * G.glow * f);
-  G.glowMesh.visible = G.glow > 0.01;
-  G.finalPass.uniforms.time.value = G.t;
-  G.finalPass.uniforms.vig.value += ((view.zoomed ? 0.35 : 1) - G.finalPass.uniforms.vig.value) * Math.min(1, dt * 3);
+const approach = (v, to, k) => { const n = v + (to - v) * k; return Math.abs(to - n) < 1e-3 ? to : n; };
+/* The lamp warms up once the room is revealed: a couple of stutters, then a filament glow */
+const LAMP_ON = [[0, 0], [0.07, 0.55], [0.12, 0.08], [0.2, 0.7], [0.25, 0.25], [0.34, 0.85], [0.9, 1]];
+function lampLevel() {
+  if (!G.litAt) return 0;
+  const t = (performance.now() - G.litAt) / 1000;
+  if (reduceMotion || t >= 0.9) return 1;
+  let i = 1; while (LAMP_ON[i][0] < t) i++;
+  const [t0, a] = LAMP_ON[i - 1], [t1, b] = LAMP_ON[i];
+  return a + (b - a) * (t - t0) / (t1 - t0);
+}
+/* Is the pointer over the Mac? (its front face, projected; the camera never rotates) */
+function overMac() {
+  if (!G.ptr || view.zoomed || G.anim) return false;
+  const v = G._hv || (G._hv = new THREE.Vector3());
+  v.set(-0.122, 0.006, 0.017).project(G.camera); const x0 = (v.x + 1) / 2 * G.w, y1 = (1 - v.y) / 2 * G.h;
+  v.set(0.122, 0.356, 0.017).project(G.camera); const x1 = (v.x + 1) / 2 * G.w, y0 = (1 - v.y) / 2 * G.h;
+  return G.ptr.x > x0 && G.ptr.x < x1 && G.ptr.y > y0 && G.ptr.y < y1;
+}
+/* Returns true while a fade (screen glow, lamp, hover, zoom dimming, vignette) is still moving */
+function updateLights(dt, idle) {
+  const u = G.finalPass.uniforms, before = G.glow + G.zoomDim + G.lamp + G.hover + u.vig.value, k3 = Math.min(1, dt * 3);
+  G.glow = approach(G.glow, G.screenOn ? 1 : 0, Math.min(1, dt * 5));
+  G.zoomDim = approach(G.zoomDim, view.zoomed ? 0.5 : 1, k3);
+  G.lamp = lampLevel();
+  /* Pointing at a switched-off Mac wakes a faint standby shimmer in the glass */
+  G.hover = approach(G.hover, !G.screenOn && overMac() ? 1 : 0, Math.min(1, dt * 6));
+  G.M.crt.emissive.setRGB(0.003 + 0.016 * G.hover, 0.004 + 0.021 * G.hover, 0.0034 + 0.02 * G.hover);
+  u.vig.value = approach(u.vig.value, view.zoomed ? 0.4 : 1, k3);
+  const f = (idle ? 1 : 1 + (Math.random() - 0.5) * 0.03) * G.zoomDim, g = G.glow * f;
+  G.screenLight.intensity = 2.4 * g;
+  G.glowMat.color.setRGB(1.06 * g, 1.13 * g, 1.17 * g);
+  G.haloMat.opacity = 0.42 * G.glow * (0.35 + 0.65 * G.zoomDim);
+  G.glowMesh.visible = G.haloMesh.visible = G.glow > 0.01;
+  G.setLamp(G.lamp);
+  u.time.value = G.t;
+  return G.glow + G.zoomDim + G.lamp + G.hover + u.vig.value !== before;
+}
+/* Eases the pointer offset; true while the camera is still moving */
+function parallax(dt) {
+  const P = G.par, x0 = P.x, y0 = P.y, w0 = P.w, k = Math.min(1, dt * 2.4);
+  P.w = approach(P.w, P.on && !view.zoomed ? 1 : 0, Math.min(1, dt * (view.zoomed ? 3 : 1.2)));
+  if (!P.w && !w0) return false; // parked while zoomed in: the pointer is working the screen, not the room
+  P.x = approach(P.x, P.tx, k); P.y = approach(P.y, P.ty, k);
+  return P.x !== x0 || P.y !== y0 || P.w !== w0;
 }
 function adapt(dt) {
   if (G.adapted) return;
@@ -1790,18 +1876,30 @@ function tick(now) {
   if (G.anim) {
     const k = Math.min(1, (now - G.anim.t0) / G.anim.dur);
     G.cur = lerpState(G.anim.from, G.anim.to, easeIO(k));
-    if (k >= 1) { G.anim = null; hqWrap.style.willChange = ''; }
+    if (k >= 1) { G.anim = null; hqWrap.style.willChange = view.zoomed ? '' : 'transform'; }
   }
-  applyCamera(G.cur); placeScreen(); updateLights(dt);
-  const idle = view.zoomed && !G.anim;
-  if (idle && ++G.frame % 3) return;
+  const drift = parallax(dt);
+  if (drift || G.applied !== G.cur) { applyCamera(withParallax(G.cur)); placeScreen(); G.applied = G.cur; }
+  /* Zoomed in, the room is out of view: render only while something changes */
+  const idle = view.zoomed && !G.anim, fading = updateLights(dt, idle);
+  if (idle && !fading && !drift && !G.dirty) return;
+  G.dirty = false;
   G.composer.render(dt);
-  if (!idle && !G.anim) adapt(dt);
+  if (!view.zoomed && !G.anim) adapt(dt);
 }
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  G.ptr = { x: e.clientX, y: e.clientY };
+  G.par.tx = Math.max(-1, Math.min(1, e.clientX / innerWidth * 2 - 1));
+  G.par.ty = Math.max(-1, Math.min(1, e.clientY / innerHeight * 2 - 1));
+}, { passive: true });
+document.documentElement.addEventListener('pointerleave', () => { G.par.tx = G.par.ty = 0; G.ptr = null; });
 
 /* ───────── Hooks the rest of the page calls ───────── */
 function hqApi() {
   window.__hq = G;
+  /* Revealed before the 3D room was ready (slow network): the lamp is simply on */
+  if (document.body.classList.contains('lit')) G.litAt = performance.now() - 1e4;
   Object.assign(HQ, {
     ready: true,
     setActive(on) {
@@ -1809,13 +1907,14 @@ function hqApi() {
       HQ.on = on;
       if (on) {
         hqWrap.append(screenEl);
-        resize(); G.cur = null; HQ.layout(false);
-        applyCamera(G.cur); placeScreen(); G.composer.render(0);
+        resize(); G.cur = null; G.tf = ''; HQ.layout(false);
+        G.par.w = 0; applyCamera(G.cur); placeScreen(); G.applied = G.cur; updateLights(0, true); G.composer.render(0);
+        hqWrap.style.willChange = view.zoomed ? '' : 'transform';
         document.body.classList.add('hq');
         clearTimeout(G.doneT); G.doneT = setTimeout(() => HQ.on && document.body.classList.add('hq-done'), 950);
       } else {
         glassHome.prepend(screenEl);
-        hqWrap.style.transform = '';
+        hqWrap.style.transform = ''; hqWrap.style.willChange = '';
         document.body.classList.remove('hq', 'hq-done');
       }
     },
@@ -1826,33 +1925,21 @@ function hqApi() {
         G.anim = { from: { ...G.cur }, to, t0: performance.now(), dur: 1450 };
         hqWrap.style.willChange = 'transform';
       } else { G.cur = to; G.anim = null; }
+      G.dirty = true;
     },
+    lightsUp() { if (!G.litAt) G.litAt = performance.now(); },
     power(on) { G.screenOn = on; },
     key(code, down) {
       const k = G.keys.get(code); if (!k) return;
       G._m = G._m || new THREE.Matrix4();
       G._m.compose(V3(k.p.x, k.p.y - (down ? 0.0022 : 0), k.p.z), new THREE.Quaternion(), k.s);
       G.keyMesh.setMatrixAt(k.i, G._m); G.keyMesh.instanceMatrix.needsUpdate = true;
+      G.renderer.shadowMap.needsUpdate = G.dirty = true;
     },
-    mouse(down) { if (G.mouseBtn) G.mouseBtn.position.y = G.mouseBtnY - (down ? 0.0012 : 0); }
+    mouse(down) { if (!G.mouseBtn) return; G.mouseBtn.position.y = G.mouseBtnY - (down ? 0.0012 : 0); G.renderer.shadowMap.needsUpdate = G.dirty = true; }
   });
 }
 /* ───────── Painted textures ───────── */
-function leafTexture() {
-  return canvasTex(128, 512, (x, W, H) => {
-    const g = x.createLinearGradient(0, 0, W, 0);
-    g.addColorStop(0, '#20391f'); g.addColorStop(0.5, '#2f5530'); g.addColorStop(1, '#1d3620');
-    x.fillStyle = g; x.fillRect(0, 0, W, H);
-    for (let y = 10; y < H; y += 14 + (y % 7)) {
-      x.strokeStyle = `rgba(150,190,120,${0.18 + (y % 5) * 0.03})`; x.lineWidth = 3 + (y % 4);
-      x.beginPath(); for (let px = 8; px <= W - 8; px += 6) x.lineTo(px, y + Math.sin(px * 0.09 + y) * 5); x.stroke();
-    }
-    const e = x.createLinearGradient(0, 0, W, 0);
-    e.addColorStop(0, '#c9c064'); e.addColorStop(0.07, 'rgba(201,192,100,.2)'); e.addColorStop(0.12, 'rgba(0,0,0,0)');
-    e.addColorStop(0.88, 'rgba(0,0,0,0)'); e.addColorStop(0.93, 'rgba(201,192,100,.2)'); e.addColorStop(1, '#c9c064');
-    x.fillStyle = e; x.fillRect(0, 0, W, H);
-  });
-}
 function posterTexture() {
   return canvasTex(768, 1040, (x, W, H) => {
     x.fillStyle = '#f3f0e8'; x.fillRect(0, 0, W, H);
@@ -1864,10 +1951,26 @@ function posterTexture() {
     x.fillStyle = '#1b1b19'; x.fillRect(m, m + 470, pw, 34);
     x.fillStyle = '#d8a13e'; x.fillRect(m, m + 526, pw * 0.56, 34);
     x.fillStyle = '#1b1b19'; x.font = 'italic 92px "Instrument Serif", Georgia, serif';
-    x.fillText('Systems', m + 34, m + ph - 170); x.fillText('that stay up.', m + 34, m + ph - 90);
+    x.fillText('Curiosity', m + 34, m + ph - 170); x.fillText('in motion.', m + 34, m + ph - 90);
     x.font = '500 20px "IBM Plex Mono", Menlo, monospace'; x.fillText('N° 07', m + 34, m + ph - 36);
-    x.textAlign = 'right'; x.fillText('BROOKLYN · 1984', m + pw - 34, m + ph - 36);
+    x.textAlign = 'right'; x.fillText('KOCHI · 1984', m + pw - 34, m + ph - 36);
     x.restore();
+    /* Paper tooth and a little foxing, so the print doesn't read as a flat texture */
+    const r = rng(5), im = x.getImageData(0, 0, W, H), d = im.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 14; d[i] += n; d[i + 1] += n; d[i + 2] += n * 0.9; }
+    x.putImageData(im, 0, 0);
+    const fox = x.createRadialGradient(W * 0.5, H * 0.45, H * 0.3, W * 0.5, H * 0.5, H * 0.75);
+    fox.addColorStop(0, 'rgba(120,90,40,0)'); fox.addColorStop(1, 'rgba(120,90,40,.16)');
+    x.fillStyle = fox; x.fillRect(0, 0, W, H);
+  });
+}
+/* CRT halation: light from the picture scattering in the faceplate, a soft rim around it */
+function haloTexture(gw, gh, sw, sh) {
+  const W = 256, H = Math.round(W * gh / gw);
+  return canvasTex(W, H, (x) => {
+    const p = rrect(new Path2D(), W * sw / gw, H * sh / gh, W * 0.03, W / 2, H / 2);
+    x.fillStyle = '#fff'; x.shadowColor = '#fff';
+    for (const [blur, a] of [[20, 0.35], [6, 0.85]]) { x.shadowBlur = blur; x.globalAlpha = a; x.fill(p); }
   });
 }
 function floppyTexture(label, sub) {
@@ -1979,7 +2082,9 @@ void main(){
   float trail=max(t1,t2);
   vec3 col=city(st,1.);
   if(D.m>.002){
-    vec3 lens=city(D.c-D.n*vec2(.05,.07),.42)*1.45+vec3(.03,.028,.03);
+    /* each drop is a tiny fisheye: it holds the whole street, upside down, lights at the top */
+    vec2 q=vec2(D.c.x-D.n.x*.2, clamp(.2-D.n.y*.19+(D.c.y-.5)*.05,.012,.62));
+    vec3 lens=city(q,.3)*1.5+vec3(.03,.028,.03);
     float e=length(D.n);
     lens*=1.-.6*smoothstep(.72,1.,e);
     lens+=vec3(1.,.82,.6)*smoothstep(.26,0.,length(D.n-vec2(.36,.4)))*.75;
@@ -2017,12 +2122,12 @@ function dustPoints(h, R, count) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('seed', new THREE.BufferAttribute(seed, 3));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { time: U.time, px: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { time: U.time, px: { value: 1 }, k: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: `uniform float time, px; attribute vec3 seed; varying float vA;
 void main(){ vec3 p=position; p.x+=sin(time*.21+seed.x*6.28)*.012; p.y+=sin(time*.13+seed.y*6.28)*.018; p.z+=cos(time*.17+seed.z*6.28)*.012;
   vec4 mv=modelViewMatrix*vec4(p,1.); gl_Position=projectionMatrix*mv;
   gl_PointSize=px*(1.2+seed.x*2.2)/(-mv.z); vA=.25+.75*(.5+.5*sin(time*(.6+seed.y)+seed.z*40.)); }`,
-    fragmentShader: 'varying float vA; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d)*vA*.55; gl_FragColor=vec4(vec3(1.,.86,.65)*a,1.); }'
+    fragmentShader: 'uniform float k; varying float vA; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d)*vA*.55*k; gl_FragColor=vec4(vec3(1.,.86,.65)*a,1.); }'
   });
   return new THREE.Points(geo, mat);
 }
@@ -2044,14 +2149,57 @@ void main(){ float y=vUv.y; float x=vUv.x-.5;
   });
 }
 
-/* Film finish: lens vignette, slight chromatic fringing, grain */
+/* Reflections: a stand-in for this room (dusk in the window, the lamp and the pool of light
+   it throws, the dim far wall) baked once into the environment map, so glossy things mirror
+   the studio instead of a generic white box */
+const ENV = { room: ['#101311', 1], dusk: ['#c98a70', 1.1], night: ['#2b3866', 0.9], bulb: ['#ffd9a8', 40], shade: ['#ffb877', 3], pool: ['#ff9e5e', 1.3], far: ['#4a3b2e', 3.2] };
+function roomReflections(k = ENV) {
+  const s = new THREE.Scene(), O = V3(0, 0.2, 0.05);
+  const lit = ([color, i], side = THREE.DoubleSide) => new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(i), side });
+  const glow = (geo, c, p, face) => { const m = new THREE.Mesh(geo, lit(c)); m.position.copy(p).sub(O); m.lookAt(face.clone().sub(O)); s.add(m); };
+  s.add(new THREE.Mesh(new THREE.BoxGeometry(7, 4.4, 7), lit(k.room, THREE.BackSide)));
+  glow(new THREE.PlaneGeometry(1.1, 0.55), k.dusk, V3(-0.98, 0.38, -0.62), O);     // dusk low in the window
+  glow(new THREE.PlaneGeometry(1.1, 0.75), k.night, V3(-0.98, 1.03, -0.62), O);    // night sky above it
+  glow(new THREE.CircleGeometry(0.035, 24), k.bulb, V3(0.2, 0.36, -0.06), O);      // the bulb
+  glow(new THREE.CircleGeometry(0.075, 32), k.shade, V3(0.21, 0.375, -0.08), O);   // inside of the shade
+  glow(new THREE.CircleGeometry(0.26, 40), k.pool, V3(0.2, 0, 0.03), V3(0.2, 1, 0.03)); // pool of light on the desk
+  glow(new THREE.PlaneGeometry(4.5, 1.8), k.far, V3(0, 0.9, 2.4), O);              // the far side of the room
+  return s;
+}
+
+/* Scene pass: draw the room into a 4x MSAA target, then resolve it into the
+   (single-sample) post-processing chain, dropping any NaN/Inf pixels on the way
+   so bloom can't smear them. Only this pass needs anti-aliasing. */
+function scenePass(scene, cam) {
+  const msaa = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+  const quad = new FullScreenQuad(new THREE.ShaderMaterial({
+    uniforms: { tDiffuse: { value: msaa.texture } }, vertexShader: VS_UV, depthTest: false, depthWrite: false,
+    fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); if(any(isnan(c))||any(isinf(c))) c=vec4(0.,0.,0.,1.); gl_FragColor=vec4(min(c.rgb,vec3(64.)),1.); }'
+  }));
+  return {
+    enabled: true, needsSwap: true, clear: false, renderToScreen: false,
+    setSize(w, h) { msaa.setSize(w, h); },
+    render(r, write) { r.setRenderTarget(msaa); r.render(scene, cam); r.setRenderTarget(write); quad.render(r); },
+    dispose() { msaa.dispose(); quad.dispose(); }
+  };
+}
+
+/* Film finish: tone mapping (three.js supplies toneMapping() and the sRGB encode when
+   drawing to the screen), a light split-tone grade, lens vignette, chromatic fringing, grain */
 function finalShader() {
   return {
     uniforms: { tDiffuse: { value: null }, time: U.time, res: { value: new THREE.Vector2(1, 1) }, vig: { value: 1 } },
     vertexShader: VS_UV,
     fragmentShader: `uniform sampler2D tDiffuse; uniform float time, vig; uniform vec2 res; varying vec2 vUv;
+vec3 grade(vec3 c){
+  float l=dot(c,vec3(.2126,.7152,.0722));
+  c*=mix(vec3(.94,1.,1.07),vec3(1.),smoothstep(0.,.42,l));     /* night-blue shadows */
+  c*=mix(vec3(1.),vec3(1.04,1.,.94),smoothstep(.5,1.,l));      /* tungsten highlights */
+  return mix(vec3(l),c,1.06);
+}
 void main(){ vec2 c=vUv-.5; float d=dot(c,c); vec2 o=c*d*.005*vig;
-  vec3 col=vec3(texture2D(tDiffuse,vUv+o).r, texture2D(tDiffuse,vUv).g, texture2D(tDiffuse,vUv-o).b);
+  vec3 hdr=vec3(texture2D(tDiffuse,vUv+o).r, texture2D(tDiffuse,vUv).g, texture2D(tDiffuse,vUv-o).b);
+  vec3 col=grade(linearToOutputTexel(vec4(toneMapping(hdr),1.)).rgb);
   float v=smoothstep(.9,.2,length(c*vec2(1.,1.2))); col*=mix(1.,mix(.5,1.,v),vig);
   float g=fract(sin(dot(floor(vUv*res)+fract(time*7.3)*113., vec2(12.9898,78.233)))*43758.5453);
   col+=(g-.5)*.028;
@@ -2075,16 +2223,45 @@ function makeMaterials() {
   M.cord = new THREE.MeshStandardMaterial({ color: '#cbc2ae', roughness: 0.55 });
   M.wood = procMat(new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.5, clearcoat: 0.55, clearcoatRoughness: 0.22 }), {
     key: 'wood',
-    albedo: `float n=fbm(vec2(p.x*1.4,p.z*6.)); float g=fbm(vec2(p.x*2.2,p.z*85.)); float r=sin((p.z*24.+n*5.5+p.x*.35)*6.2831)*.5+.5;
+    pre: 'float WN=fbm(vec2(pW.x*1.4,pW.z*6.)), WG=fbm(vec2(pW.x*2.2,pW.z*85.));',
+    albedo: `float n=WN; float g=WG; float r=sin((p.z*24.+n*5.5+p.x*.35)*6.2831)*.5+.5;
       vec3 dk=vec3(.028,.012,.006), lt=vec3(.15,.07,.032); diffuseColor.rgb=mix(dk,lt,clamp(.18+.55*n+.22*r*g+.2*g,0.,1.));`,
-    rough: 'roughnessFactor=.4+.3*fbm(vec2(p.x*2.2,p.z*85.));',
-    bump: 'hgt=(fbm(vec2(p.x*2.2,p.z*85.))*.6+fbm(vec2(p.x*9.,p.z*300.))*.4)*.00025;'
+    rough: 'roughnessFactor=.4+.3*WG;',
+    bump: 'hgt=(WG*.6+fbm(vec2(p.x*9.,p.z*300.))*.4)*.00025;'
   });
   M.plaster = procMat(new THREE.MeshStandardMaterial({ color: '#2d3e34', roughness: 0.93 }),
     { key: 'plaster', albedo: 'diffuseColor.rgb*=.8+.3*fbm3(p*3.5)+.12*fbm3(p*22.);', bump: 'hgt=(fbm3(p*55.)*.65+fbm3(p*11.)*.35)*.0016;' });
-  M.terracotta = procMat(new THREE.MeshStandardMaterial({ color: '#b5623f', roughness: 0.92 }),
-    { key: 'terra', albedo: 'diffuseColor.rgb*=.82+.3*fbm3(p*40.);', bump: 'hgt=fbm3(p*380.)*.00018;' });
-  M.soil = procMat(new THREE.MeshStandardMaterial({ color: '#1b130d', roughness: 1 }), { key: 'soil', bump: 'hgt=fbm3(p*500.)*.0006;' });
+  /* Unglazed clay: mottled, with a chalky mineral bloom and a darker damp band at the foot */
+  M.terracotta = procMat(new THREE.MeshStandardMaterial({ color: '#8f5d48', roughness: 0.96 }), {
+    key: 'terra',
+    albedo: `float n=fbm3(p*38.), b=smoothstep(.56,.8,fbm3(p*13.+4.));
+      diffuseColor.rgb*=.78+.34*n; diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.44,.4,.35),b*.5);
+      diffuseColor.rgb*=1.-.32*smoothstep(.035,0.,p.y);`,
+    bump: 'hgt=fbm3(p*380.)*.00018+fbm3(p*60.)*.0001;'
+  });
+  /* Potting mix, flecked with perlite */
+  M.soil = procMat(new THREE.MeshStandardMaterial({ color: '#241a12', roughness: 1 }), {
+    key: 'soil',
+    albedo: 'diffuseColor.rgb*=.55+.9*fbm3(p*260.); diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.7,.68,.63),smoothstep(.76,.84,fbm3(p*700.+7.)));',
+    bump: 'hgt=fbm3(p*500.)*.0006;'
+  });
+  /* Sansevieria 'Laurentii': deep green with broken grey-green cross-bands and golden margins,
+     waxy. Drawn in leaf space (vUv): u across the blade, v up it; the integer part of u picks
+     each leaf's own pattern */
+  M.leaf = procMat(new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.55, specularIntensity: 0.45, clearcoat: 0.12, clearcoatRoughness: 0.5, envMapIntensity: 0.7, side: THREE.DoubleSide }), {
+    key: 'leaf',
+    pre: `float LS=floor(vUv.x), LU=fract(vUv.x), LV=vUv.y, LE=abs(LU-.5)*2.;
+      float LB=sin((LV*19.+fbm(vec2(LU*2.2+LS*7.3,LV*4.+LS*1.7))*2.2+LU*.6+LS*.37)*6.2831)*.5+.5;
+      LB=smoothstep(.3,.92,LB+(fbm(vec2(LU*6.+LS*3.1,LV*34.))-.5)*.7);`,
+    albedo: `vec3 c=mix(vec3(.004,.05,.03),vec3(.01,.095,.055),fbm(vec2(LU*3.+LS,LV*12.)));
+      c=mix(c,vec3(.03,.2,.13),LB*.55*(1.-LE*.5));
+      float mw=.86+.05*fbm(vec2(LV*16.+LS*5.,LS*2.));
+      c=mix(c,vec3(.2,.32,.05),smoothstep(mw,mw+.05,LE));
+      diffuseColor.rgb=mix(c,vec3(.11,.085,.04),smoothstep(.955,1.,LV)*.85);`,
+    rough: 'roughnessFactor=.5+.16*fbm(vec2(LU*6.,LV*40.));',
+    bump: 'hgt=LB*.00004+fbm(vec2(LU*40.,LV*400.))*.00002;'
+  });
+  M.leaf.defines = { USE_UV: '' };
   M.enamel = new THREE.MeshPhysicalMaterial({ color: '#eee8da', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
   M.enamelBlue = new THREE.MeshPhysicalMaterial({ color: '#1f3563', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
   M.coffee = new THREE.MeshPhysicalMaterial({ color: '#130904', roughness: 0.06, clearcoat: 1 });
@@ -2147,8 +2324,11 @@ function buildMac() {
   mesh(gg, M.crt, 0, RCY, zG + 0.0003, g);
   G.SW = 0.1806; G.SH = G.SW / 1.4953;
   const zS = zG + 0.0072;
+  /* The lit picture (behind the HTML screen, feeding the bloom) and its halation in the glass */
   G.glowMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-  G.glowMesh = mesh(new THREE.PlaneGeometry(G.SW, G.SH), G.glowMat, 0, RCY, zS - 0.0005, g, false);
+  G.glowMesh = mesh(new THREE.ShapeGeometry(rrect(new THREE.Shape(), G.SW, G.SH, 0.0047), 6), G.glowMat, 0, RCY, zS - 0.0005, g, false);
+  G.haloMat = new THREE.MeshBasicMaterial({ map: haloTexture(GW, GH, G.SW, G.SH), color: '#dde6ff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+  G.haloMesh = mesh(new THREE.PlaneGeometry(GW, GH), G.haloMat, 0, RCY, zS - 0.0008, g, false);
   G.SC = V3(0, 0.006 + RCY, -0.12 + zS);
   mesh(new THREE.BoxGeometry(0.226, 0.0014, 0.002), M.plasticDk, 0, 0.128, FZ - 0.0006, g, false);
   mesh(new THREE.BoxGeometry(0.056, 0.0042, 0.004), M.black, 0.0385, 0.064, FZ - 0.0012, g, false);
@@ -2222,7 +2402,7 @@ function buildMouse() {
 /* ───────── Desk lamp: the key light, with shadows, a beam and dust ───────── */
 function buildLamp() {
   const M = G.M, s = G.scene;
-  const P0 = V3(0.4, 0.034, -0.27), P1 = V3(0.435, 0.3, -0.232), P2 = V3(0.215, 0.405, -0.1), T = V3(0.16, 0, 0.04);
+  const P0 = V3(0.4, 0.034, -0.27), P1 = V3(0.435, 0.3, -0.232), P2 = V3(0.215, 0.405, -0.1), T = V3(0.2, 0, 0.03);
   mesh(new THREE.CylinderGeometry(0.066, 0.071, 0.022, 48), M.paint, 0.4, 0.011, -0.27);
   mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.014, 24), M.paint, 0.4, 0.029, -0.27);
   const n = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(P1, P0), new THREE.Vector3().subVectors(P2, P1)).normalize();
@@ -2240,58 +2420,86 @@ function buildLamp() {
   head.quaternion.setFromUnitVectors(V3(0, 1, 0), dir); s.add(head);
   const prof = [[0, -0.014], [0.017, -0.014], [0.021, -0.002], [0.028, 0.018], [0.045, 0.048], [0.064, 0.075], [0.067, 0.08]].map(([x, y]) => new THREE.Vector2(x, y));
   mesh(new THREE.LatheGeometry(prof, 48), M.paint, 0, 0, 0, head);
-  mesh(new THREE.LatheGeometry(prof.map(v => new THREE.Vector2(v.x * 0.96, v.y + 0.0015)), 48),
-    new THREE.MeshStandardMaterial({ color: '#e8e0cf', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8a', emissiveIntensity: 0.35 }), 0, 0, 0, head, false);
+  const lining = new THREE.MeshStandardMaterial({ color: '#e8e0cf', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8a', emissiveIntensity: 0.35 });
+  mesh(new THREE.LatheGeometry(prof.map(v => new THREE.Vector2(v.x * 0.96, v.y + 0.0015)), 48), lining, 0, 0, 0, head, false);
   const bulb = mesh(new THREE.SphereGeometry(0.019, 24, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 6.4, 3.6) }), 0, 0.05, 0, head, false);
   head.updateMatrixWorld(true);
   const bw = bulb.getWorldPosition(new THREE.Vector3());
-  const spot = G.spot = new THREE.SpotLight('#ffc27e', 3, 0, 0.5, 0.62, 2);
+  const spot = G.spot = new THREE.SpotLight('#ffc27e', 2.3, 0, 0.5, 0.7, 2);
   spot.position.copy(bw); spot.target.position.copy(T); s.add(spot, spot.target);
   spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.00015; spot.shadow.normalBias = 0.012;
   spot.shadow.camera.near = 0.05; spot.shadow.camera.far = 2;
   const spill = new THREE.PointLight('#ffb070', 0.18, 1.6, 2);
   spill.position.copy(P2).add(V3(0.04, 0.06, -0.08)); s.add(spill);
+  /* Lamplight bouncing off the walnut: warms the wall, the Mac's flank and the mug */
+  const bounce = new THREE.RectAreaLight('#ff9d5c', 0.9, 0.42, 0.3);
+  bounce.position.set(T.x + 0.02, 0.004, T.z); bounce.lookAt(T.x + 0.02, 1, T.z); s.add(bounce);
   const bh = 0.52, br = bh * Math.tan(0.5), cone = new THREE.Group();
   cone.position.copy(bw).addScaledVector(dir, 0.015 + bh / 2);
   cone.quaternion.setFromUnitVectors(V3(0, -1, 0), dir); s.add(cone);
-  cone.add(new THREE.Mesh(new THREE.ConeGeometry(br, bh, 48, 1, true), beamMaterial()));
+  const beam = beamMaterial();
+  cone.add(new THREE.Mesh(new THREE.ConeGeometry(br, bh, 48, 1, true), beam));
   G.dust = dustPoints(bh, br, 420); cone.add(G.dust);
   blob(0.22, 0.22, 0.4, -0.27, 0.6);
+  /* Everything the lamp lights, on one dimmer (0 = off, 1 = on) for the warm-up at the start */
+  G.setLamp = k => {
+    spot.intensity = 2.3 * k; spill.intensity = 0.18 * k; bounce.intensity = 0.9 * k;
+    bulb.material.color.setRGB(0.2 + 8.8 * k, 0.18 + 6.2 * k, 0.15 + 3.45 * k);
+    lining.emissiveIntensity = 0.35 * k; beam.uniforms.k.value = k; G.dust.material.uniforms.k.value = k;
+  };
 }
 
-/* ───────── Snake plant in terracotta ───────── */
-function buildPlant() {
-  const M = G.M, g = new THREE.Group();
-  g.position.set(-0.36, 0, -0.33); G.scene.add(g);
-  const prof = [[0, 0.002], [0.05, 0.002], [0.054, 0.006], [0.069, 0.118], [0.077, 0.12], [0.078, 0.136], [0.071, 0.138], [0.066, 0.13], [0.001, 0.126]].map(([x, y]) => new THREE.Vector2(x, y));
-  mesh(new THREE.LatheGeometry(prof, 56), M.terracotta, 0, 0, 0, g);
-  mesh(new THREE.CircleGeometry(0.066, 40), M.soil, 0, 0.124, 0, g).rotation.x = -Math.PI / 2;
-  const lm = new THREE.MeshStandardMaterial({ map: leafTexture(), roughness: 0.45, side: THREE.DoubleSide }), r = rng(11);
-  for (let i = 0; i < 11; i++) {
-    const h = 0.24 + r() * 0.26, w = 0.036 + r() * 0.02, bend = (r() - 0.3) * 0.06;
-    const geo = new THREE.PlaneGeometry(1, 1, 4, 24), p = geo.attributes.position;
-    for (let k = 0; k < p.count; k++) {
-      const u = p.getX(k), v = p.getY(k) + 0.5, wv = w * Math.pow(Math.sin(Math.PI * (0.12 + 0.88 * v)), 0.55);
-      p.setXYZ(k, u * wv, v * h, -Math.abs(u) * wv * 0.45 + bend * v * v);
-    }
-    geo.computeVertexNormals();
-    mesh(geo, lm, (r() - 0.5) * 0.05, 0.12, (r() - 0.5) * 0.05, g).rotation.set((r() - 0.5) * 0.35, r() * Math.PI * 2, (r() - 0.5) * 0.35, 'YXZ');
+/* ───────── Snake plant in a terracotta pot ───────── */
+/* One blade: a pointed strap folded into a shallow V, arched back and slightly twisted.
+   The leaf's seed rides in the integer part of its u coordinate (see M.leaf) */
+function leafGeo(h, w, arch, twist, seed) {
+  const geo = new THREE.PlaneGeometry(1, 1, 6, 40), p = geo.attributes.position, uv = geo.attributes.uv;
+  for (let k = 0; k < p.count; k++) {
+    const u = p.getX(k), v = p.getY(k) + 0.5, wv = w * Math.pow(Math.sin(Math.PI * (0.14 + 0.86 * v)), 0.7);
+    const x = u * wv, z = -Math.pow(Math.abs(u) * 2, 1.5) * wv * 0.2, a = twist * v, c = Math.cos(a), s = Math.sin(a);
+    p.setXYZ(k, x * c - z * s, v * h, x * s + z * c + arch * v * v);
+    uv.setX(k, seed + 0.002 + uv.getX(k) * 0.996);
   }
-  blob(0.24, 0.24, -0.36, -0.33, 0.65);
+  geo.computeVertexNormals();
+  return geo;
+}
+function buildPlant() {
+  const M = G.M, g = new THREE.Group(), r = rng(11);
+  g.position.set(-0.36, 0, -0.33); G.scene.add(g);
+  const lathe = pts => mesh(new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 64), M.terracotta, 0, 0, 0, g);
+  lathe([[0, 0], [0.074, 0], [0.079, 0.003], [0.082, 0.013], [0.078, 0.014], [0.074, 0.006], [0, 0.006]]);                       // saucer
+  lathe([[0, 0.006], [0.049, 0.006], [0.052, 0.01], [0.066, 0.103], [0.075, 0.105], [0.078, 0.109], [0.079, 0.13],
+    [0.077, 0.135], [0.072, 0.136], [0.069, 0.133], [0.066, 0.116], [0.001, 0.116]]);                                          // pot, rolled rim
+  mesh(new THREE.CircleGeometry(0.0664, 48), M.soil, 0, 0.12, 0, g).rotation.x = -Math.PI / 2;
+  /* Three clumps off the rhizome, each a fan: the middle blades stand tallest, the outer ones lean away */
+  let seed = 0;
+  for (const [cx, cz, n] of [[-0.021, 0.008, 5], [0.022, -0.006, 4], [0.003, 0.027, 3]]) {
+    const face = r() * Math.PI * 2;
+    for (let j = 0; j < n; j++) {
+      const t = j / (n - 1) - 0.5, h = (0.47 - Math.abs(t) * 0.26) * (0.78 + r() * 0.3), w = 0.037 + r() * 0.02;
+      const leaf = mesh(leafGeo(h, w, (0.012 + r() * 0.04) * (0.5 + Math.abs(t) * 2.4), (r() - 0.5) * 1.1, seed++), M.leaf,
+        cx + Math.cos(face) * t * 0.016, 0.114, cz - Math.sin(face) * t * 0.016, g);
+      leaf.rotation.set(0.04 + r() * 0.08 + Math.abs(t) * 0.22, face + t * 1.1 + (r() - 0.5) * 0.35, t * 0.5, 'YXZ');
+    }
+  }
+  blob(0.27, 0.27, -0.36, -0.33, 0.65);
 }
 
 /* ───────── Coffee, floppies, poster ───────── */
+/* The mug sits in the lamplight, not out at the frame's corner: the overview's shifted lens
+   is wide, and round things near its bottom corners stretch and lean */
+const MUG = { x: 0.405, z: -0.035 };
 function buildMug() {
   const M = G.M, g = new THREE.Group();
-  g.position.set(0.455, 0, 0.115); g.rotation.y = -0.5; G.scene.add(g);
+  g.position.set(MUG.x, 0, MUG.z); g.rotation.y = -0.5; G.scene.add(g);
   const prof = [[0, 0], [0.037, 0], [0.04, 0.003], [0.041, 0.093], [0.0395, 0.096], [0.0365, 0.095], [0.0355, 0.006], [0.0005, 0.006]].map(([x, y]) => new THREE.Vector2(x, y));
   mesh(new THREE.LatheGeometry(prof, 56), M.enamel, 0, 0, 0, g);
   mesh(new THREE.TorusGeometry(0.038, 0.0021, 10, 56), M.enamelBlue, 0, 0.0955, 0, g).rotation.x = Math.PI / 2;
   mesh(new THREE.CircleGeometry(0.0356, 48), M.coffee, 0, 0.079, 0, g, false).rotation.x = -Math.PI / 2;
   mesh(new THREE.TorusGeometry(0.021, 0.0055, 14, 32, Math.PI), M.enamel, 0.04, 0.05, 0, g).rotation.z = -Math.PI / 2;
   const steam = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.18), steamMaterial());
-  steam.position.set(0.455, 0.18, 0.115); G.scene.add(steam);
-  blob(0.13, 0.13, 0.455, 0.115, 0.55);
+  steam.position.set(MUG.x, 0.18, MUG.z); G.scene.add(steam);
+  blob(0.13, 0.13, MUG.x, MUG.z, 0.55);
 }
 function buildFloppies() {
   const edge = new THREE.MeshStandardMaterial({ color: '#262629', roughness: 0.5 });
@@ -2303,7 +2511,7 @@ function buildFloppies() {
 }
 function buildPoster() {
   const M = G.M, g = new THREE.Group(), W = 0.3, H = 0.4, f = 0.012, d = 0.02;
-  g.position.set(0.43, 0.42, -0.492); G.scene.add(g);
+  g.position.set(0.555, 0.42, -0.492); G.scene.add(g);
   [[0, H / 2 - f / 2, W, f], [0, -H / 2 + f / 2, W, f], [-W / 2 + f / 2, 0, f, H], [W / 2 - f / 2, 0, f, H]]
     .forEach(([x, y, w, h]) => mesh(new THREE.BoxGeometry(w, h, d), M.paint, x, y, 0, g));
   mesh(new THREE.PlaneGeometry(W - 2 * f, H - 2 * f), new THREE.MeshStandardMaterial({ map: posterTexture(), roughness: 0.75 }), 0, 0, -0.002, g);
@@ -2331,13 +2539,15 @@ function buildHQ() {
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false; // nothing that casts a shadow moves unless a key or the mouse is pressed
+  renderer.shadowMap.needsUpdate = true;
   G.dpr = Math.min(devicePixelRatio || 1, 1.75);
 
   const scene = G.scene = new THREE.Scene();
   scene.background = new THREE.Color('#040504');
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.16;
+  scene.environment = pmrem.fromScene(roomReflections(), 0.02, 0.005, 20).texture;
+  scene.environmentIntensity = 1;
   pmrem.dispose();
   RectAreaLightUniformsLib.init();
 
@@ -2352,15 +2562,10 @@ function buildHQ() {
   makeMaterials();
   buildRoom(); buildMac(); buildKeyboard(); buildMouse(); buildLamp(); buildPlant(); buildMug(); buildFloppies(); buildPoster(); buildLights();
 
-  const comp = G.composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
-  comp.addPass(new RenderPass(scene, cam));
-  comp.addPass(new ShaderPass({
-    uniforms: { tDiffuse: { value: null } }, vertexShader: VS_UV,
-    fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); if(any(isnan(c))||any(isinf(c))) c=vec4(0.,0.,0.,1.); gl_FragColor=vec4(min(c.rgb,vec3(64.)),1.); }'
-  }));
-  G.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.42, 0.55, 1.05);
+  const comp = G.composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }));
+  comp.addPass(scenePass(scene, cam));
+  G.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.34, 0.42, 0.96);
   comp.addPass(G.bloom);
-  comp.addPass(new OutputPass());
   G.finalPass = new ShaderPass(finalShader());
   comp.addPass(G.finalPass);
 
@@ -2371,25 +2576,31 @@ function buildHQ() {
   HQ.power(power === 'on');
 }
 
-(async () => {
+/* Phones never show the room, so three.js is only fetched once the window is wide enough to use it */
+function whenWide(load) {
+  if (!view.mobile) return load();
+  addEventListener('resize', function grow() { if (!view.mobile) { removeEventListener('resize', grow); load(); } });
+}
+whenWide(async () => {
   try {
     const A = 'three/addons/';
-    const m = await Promise.all(['three', A + 'geometries/RoundedBoxGeometry.js', A + 'postprocessing/EffectComposer.js', A + 'postprocessing/RenderPass.js',
-      A + 'postprocessing/UnrealBloomPass.js', A + 'postprocessing/ShaderPass.js', A + 'postprocessing/OutputPass.js',
-      A + 'lights/RectAreaLightUniformsLib.js', A + 'environments/RoomEnvironment.js'].map(s => import(s)));
+    const m = await Promise.all(['three', A + 'geometries/RoundedBoxGeometry.js', A + 'postprocessing/EffectComposer.js', A + 'postprocessing/Pass.js',
+      A + 'postprocessing/UnrealBloomPass.js', A + 'postprocessing/ShaderPass.js', A + 'lights/RectAreaLightUniformsLib.js'].map(s => import(s)));
     THREE = m[0];
-    ({ RoundedBoxGeometry } = m[1]); ({ EffectComposer } = m[2]); ({ RenderPass } = m[3]); ({ UnrealBloomPass } = m[4]);
-    ({ ShaderPass } = m[5]); ({ OutputPass } = m[6]); ({ RectAreaLightUniformsLib } = m[7]); ({ RoomEnvironment } = m[8]);
+    ({ RoundedBoxGeometry } = m[1]); ({ EffectComposer } = m[2]); ({ FullScreenQuad } = m[3]); ({ UnrealBloomPass } = m[4]);
+    ({ ShaderPass } = m[5]); ({ RectAreaLightUniformsLib } = m[6]);
     await Promise.all([document.fonts.load('italic 40px "Instrument Serif"'), document.fonts.load('500 20px "IBM Plex Mono"')]).catch(() => {});
     buildHQ();
     requestAnimationFrame(tick);
     syncGfxBtn();
     layout(false);
+    requestAnimationFrame(lightsUp);
   } catch (e) {
     console.warn('High graphics mode is unavailable:', e);
     HQ.failed = true;
     syncGfxBtn();
+    lightsUp();
   }
-})();
+});
 </script>
 </body></html>

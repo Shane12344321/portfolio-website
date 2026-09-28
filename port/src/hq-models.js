@@ -15,16 +15,45 @@ function makeMaterials() {
   M.cord = new THREE.MeshStandardMaterial({ color: '#cbc2ae', roughness: 0.55 });
   M.wood = procMat(new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.5, clearcoat: 0.55, clearcoatRoughness: 0.22 }), {
     key: 'wood',
-    albedo: `float n=fbm(vec2(p.x*1.4,p.z*6.)); float g=fbm(vec2(p.x*2.2,p.z*85.)); float r=sin((p.z*24.+n*5.5+p.x*.35)*6.2831)*.5+.5;
+    pre: 'float WN=fbm(vec2(pW.x*1.4,pW.z*6.)), WG=fbm(vec2(pW.x*2.2,pW.z*85.));',
+    albedo: `float n=WN; float g=WG; float r=sin((p.z*24.+n*5.5+p.x*.35)*6.2831)*.5+.5;
       vec3 dk=vec3(.028,.012,.006), lt=vec3(.15,.07,.032); diffuseColor.rgb=mix(dk,lt,clamp(.18+.55*n+.22*r*g+.2*g,0.,1.));`,
-    rough: 'roughnessFactor=.4+.3*fbm(vec2(p.x*2.2,p.z*85.));',
-    bump: 'hgt=(fbm(vec2(p.x*2.2,p.z*85.))*.6+fbm(vec2(p.x*9.,p.z*300.))*.4)*.00025;'
+    rough: 'roughnessFactor=.4+.3*WG;',
+    bump: 'hgt=(WG*.6+fbm(vec2(p.x*9.,p.z*300.))*.4)*.00025;'
   });
   M.plaster = procMat(new THREE.MeshStandardMaterial({ color: '#2d3e34', roughness: 0.93 }),
     { key: 'plaster', albedo: 'diffuseColor.rgb*=.8+.3*fbm3(p*3.5)+.12*fbm3(p*22.);', bump: 'hgt=(fbm3(p*55.)*.65+fbm3(p*11.)*.35)*.0016;' });
-  M.terracotta = procMat(new THREE.MeshStandardMaterial({ color: '#b5623f', roughness: 0.92 }),
-    { key: 'terra', albedo: 'diffuseColor.rgb*=.82+.3*fbm3(p*40.);', bump: 'hgt=fbm3(p*380.)*.00018;' });
-  M.soil = procMat(new THREE.MeshStandardMaterial({ color: '#1b130d', roughness: 1 }), { key: 'soil', bump: 'hgt=fbm3(p*500.)*.0006;' });
+  /* Unglazed clay: mottled, with a chalky mineral bloom and a darker damp band at the foot */
+  M.terracotta = procMat(new THREE.MeshStandardMaterial({ color: '#8f5d48', roughness: 0.96 }), {
+    key: 'terra',
+    albedo: `float n=fbm3(p*38.), b=smoothstep(.56,.8,fbm3(p*13.+4.));
+      diffuseColor.rgb*=.78+.34*n; diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.44,.4,.35),b*.5);
+      diffuseColor.rgb*=1.-.32*smoothstep(.035,0.,p.y);`,
+    bump: 'hgt=fbm3(p*380.)*.00018+fbm3(p*60.)*.0001;'
+  });
+  /* Potting mix, flecked with perlite */
+  M.soil = procMat(new THREE.MeshStandardMaterial({ color: '#241a12', roughness: 1 }), {
+    key: 'soil',
+    albedo: 'diffuseColor.rgb*=.55+.9*fbm3(p*260.); diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.7,.68,.63),smoothstep(.76,.84,fbm3(p*700.+7.)));',
+    bump: 'hgt=fbm3(p*500.)*.0006;'
+  });
+  /* Sansevieria 'Laurentii': deep green with broken grey-green cross-bands and golden margins,
+     waxy. Drawn in leaf space (vUv): u across the blade, v up it; the integer part of u picks
+     each leaf's own pattern */
+  M.leaf = procMat(new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.55, specularIntensity: 0.45, clearcoat: 0.12, clearcoatRoughness: 0.5, envMapIntensity: 0.7, side: THREE.DoubleSide }), {
+    key: 'leaf',
+    pre: `float LS=floor(vUv.x), LU=fract(vUv.x), LV=vUv.y, LE=abs(LU-.5)*2.;
+      float LB=sin((LV*19.+fbm(vec2(LU*2.2+LS*7.3,LV*4.+LS*1.7))*2.2+LU*.6+LS*.37)*6.2831)*.5+.5;
+      LB=smoothstep(.3,.92,LB+(fbm(vec2(LU*6.+LS*3.1,LV*34.))-.5)*.7);`,
+    albedo: `vec3 c=mix(vec3(.004,.05,.03),vec3(.01,.095,.055),fbm(vec2(LU*3.+LS,LV*12.)));
+      c=mix(c,vec3(.03,.2,.13),LB*.55*(1.-LE*.5));
+      float mw=.86+.05*fbm(vec2(LV*16.+LS*5.,LS*2.));
+      c=mix(c,vec3(.2,.32,.05),smoothstep(mw,mw+.05,LE));
+      diffuseColor.rgb=mix(c,vec3(.11,.085,.04),smoothstep(.955,1.,LV)*.85);`,
+    rough: 'roughnessFactor=.5+.16*fbm(vec2(LU*6.,LV*40.));',
+    bump: 'hgt=LB*.00004+fbm(vec2(LU*40.,LV*400.))*.00002;'
+  });
+  M.leaf.defines = { USE_UV: '' };
   M.enamel = new THREE.MeshPhysicalMaterial({ color: '#eee8da', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 });
   M.enamelBlue = new THREE.MeshPhysicalMaterial({ color: '#1f3563', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
   M.coffee = new THREE.MeshPhysicalMaterial({ color: '#130904', roughness: 0.06, clearcoat: 1 });
@@ -87,8 +116,11 @@ function buildMac() {
   mesh(gg, M.crt, 0, RCY, zG + 0.0003, g);
   G.SW = 0.1806; G.SH = G.SW / 1.4953;
   const zS = zG + 0.0072;
+  /* The lit picture (behind the HTML screen, feeding the bloom) and its halation in the glass */
   G.glowMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-  G.glowMesh = mesh(new THREE.PlaneGeometry(G.SW, G.SH), G.glowMat, 0, RCY, zS - 0.0005, g, false);
+  G.glowMesh = mesh(new THREE.ShapeGeometry(rrect(new THREE.Shape(), G.SW, G.SH, 0.0047), 6), G.glowMat, 0, RCY, zS - 0.0005, g, false);
+  G.haloMat = new THREE.MeshBasicMaterial({ map: haloTexture(GW, GH, G.SW, G.SH), color: '#dde6ff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+  G.haloMesh = mesh(new THREE.PlaneGeometry(GW, GH), G.haloMat, 0, RCY, zS - 0.0008, g, false);
   G.SC = V3(0, 0.006 + RCY, -0.12 + zS);
   mesh(new THREE.BoxGeometry(0.226, 0.0014, 0.002), M.plasticDk, 0, 0.128, FZ - 0.0006, g, false);
   mesh(new THREE.BoxGeometry(0.056, 0.0042, 0.004), M.black, 0.0385, 0.064, FZ - 0.0012, g, false);
@@ -162,7 +194,7 @@ function buildMouse() {
 /* ───────── Desk lamp: the key light, with shadows, a beam and dust ───────── */
 function buildLamp() {
   const M = G.M, s = G.scene;
-  const P0 = V3(0.4, 0.034, -0.27), P1 = V3(0.435, 0.3, -0.232), P2 = V3(0.215, 0.405, -0.1), T = V3(0.16, 0, 0.04);
+  const P0 = V3(0.4, 0.034, -0.27), P1 = V3(0.435, 0.3, -0.232), P2 = V3(0.215, 0.405, -0.1), T = V3(0.2, 0, 0.03);
   mesh(new THREE.CylinderGeometry(0.066, 0.071, 0.022, 48), M.paint, 0.4, 0.011, -0.27);
   mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.014, 24), M.paint, 0.4, 0.029, -0.27);
   const n = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(P1, P0), new THREE.Vector3().subVectors(P2, P1)).normalize();
@@ -180,58 +212,86 @@ function buildLamp() {
   head.quaternion.setFromUnitVectors(V3(0, 1, 0), dir); s.add(head);
   const prof = [[0, -0.014], [0.017, -0.014], [0.021, -0.002], [0.028, 0.018], [0.045, 0.048], [0.064, 0.075], [0.067, 0.08]].map(([x, y]) => new THREE.Vector2(x, y));
   mesh(new THREE.LatheGeometry(prof, 48), M.paint, 0, 0, 0, head);
-  mesh(new THREE.LatheGeometry(prof.map(v => new THREE.Vector2(v.x * 0.96, v.y + 0.0015)), 48),
-    new THREE.MeshStandardMaterial({ color: '#e8e0cf', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8a', emissiveIntensity: 0.35 }), 0, 0, 0, head, false);
+  const lining = new THREE.MeshStandardMaterial({ color: '#e8e0cf', roughness: 0.6, side: THREE.BackSide, emissive: '#ffcf8a', emissiveIntensity: 0.35 });
+  mesh(new THREE.LatheGeometry(prof.map(v => new THREE.Vector2(v.x * 0.96, v.y + 0.0015)), 48), lining, 0, 0, 0, head, false);
   const bulb = mesh(new THREE.SphereGeometry(0.019, 24, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 6.4, 3.6) }), 0, 0.05, 0, head, false);
   head.updateMatrixWorld(true);
   const bw = bulb.getWorldPosition(new THREE.Vector3());
-  const spot = G.spot = new THREE.SpotLight('#ffc27e', 3, 0, 0.5, 0.62, 2);
+  const spot = G.spot = new THREE.SpotLight('#ffc27e', 2.3, 0, 0.5, 0.7, 2);
   spot.position.copy(bw); spot.target.position.copy(T); s.add(spot, spot.target);
   spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.00015; spot.shadow.normalBias = 0.012;
   spot.shadow.camera.near = 0.05; spot.shadow.camera.far = 2;
   const spill = new THREE.PointLight('#ffb070', 0.18, 1.6, 2);
   spill.position.copy(P2).add(V3(0.04, 0.06, -0.08)); s.add(spill);
+  /* Lamplight bouncing off the walnut: warms the wall, the Mac's flank and the mug */
+  const bounce = new THREE.RectAreaLight('#ff9d5c', 0.9, 0.42, 0.3);
+  bounce.position.set(T.x + 0.02, 0.004, T.z); bounce.lookAt(T.x + 0.02, 1, T.z); s.add(bounce);
   const bh = 0.52, br = bh * Math.tan(0.5), cone = new THREE.Group();
   cone.position.copy(bw).addScaledVector(dir, 0.015 + bh / 2);
   cone.quaternion.setFromUnitVectors(V3(0, -1, 0), dir); s.add(cone);
-  cone.add(new THREE.Mesh(new THREE.ConeGeometry(br, bh, 48, 1, true), beamMaterial()));
+  const beam = beamMaterial();
+  cone.add(new THREE.Mesh(new THREE.ConeGeometry(br, bh, 48, 1, true), beam));
   G.dust = dustPoints(bh, br, 420); cone.add(G.dust);
   blob(0.22, 0.22, 0.4, -0.27, 0.6);
+  /* Everything the lamp lights, on one dimmer (0 = off, 1 = on) for the warm-up at the start */
+  G.setLamp = k => {
+    spot.intensity = 2.3 * k; spill.intensity = 0.18 * k; bounce.intensity = 0.9 * k;
+    bulb.material.color.setRGB(0.2 + 8.8 * k, 0.18 + 6.2 * k, 0.15 + 3.45 * k);
+    lining.emissiveIntensity = 0.35 * k; beam.uniforms.k.value = k; G.dust.material.uniforms.k.value = k;
+  };
 }
 
-/* ───────── Snake plant in terracotta ───────── */
-function buildPlant() {
-  const M = G.M, g = new THREE.Group();
-  g.position.set(-0.36, 0, -0.33); G.scene.add(g);
-  const prof = [[0, 0.002], [0.05, 0.002], [0.054, 0.006], [0.069, 0.118], [0.077, 0.12], [0.078, 0.136], [0.071, 0.138], [0.066, 0.13], [0.001, 0.126]].map(([x, y]) => new THREE.Vector2(x, y));
-  mesh(new THREE.LatheGeometry(prof, 56), M.terracotta, 0, 0, 0, g);
-  mesh(new THREE.CircleGeometry(0.066, 40), M.soil, 0, 0.124, 0, g).rotation.x = -Math.PI / 2;
-  const lm = new THREE.MeshStandardMaterial({ map: leafTexture(), roughness: 0.45, side: THREE.DoubleSide }), r = rng(11);
-  for (let i = 0; i < 11; i++) {
-    const h = 0.24 + r() * 0.26, w = 0.036 + r() * 0.02, bend = (r() - 0.3) * 0.06;
-    const geo = new THREE.PlaneGeometry(1, 1, 4, 24), p = geo.attributes.position;
-    for (let k = 0; k < p.count; k++) {
-      const u = p.getX(k), v = p.getY(k) + 0.5, wv = w * Math.pow(Math.sin(Math.PI * (0.12 + 0.88 * v)), 0.55);
-      p.setXYZ(k, u * wv, v * h, -Math.abs(u) * wv * 0.45 + bend * v * v);
-    }
-    geo.computeVertexNormals();
-    mesh(geo, lm, (r() - 0.5) * 0.05, 0.12, (r() - 0.5) * 0.05, g).rotation.set((r() - 0.5) * 0.35, r() * Math.PI * 2, (r() - 0.5) * 0.35, 'YXZ');
+/* ───────── Snake plant in a terracotta pot ───────── */
+/* One blade: a pointed strap folded into a shallow V, arched back and slightly twisted.
+   The leaf's seed rides in the integer part of its u coordinate (see M.leaf) */
+function leafGeo(h, w, arch, twist, seed) {
+  const geo = new THREE.PlaneGeometry(1, 1, 6, 40), p = geo.attributes.position, uv = geo.attributes.uv;
+  for (let k = 0; k < p.count; k++) {
+    const u = p.getX(k), v = p.getY(k) + 0.5, wv = w * Math.pow(Math.sin(Math.PI * (0.14 + 0.86 * v)), 0.7);
+    const x = u * wv, z = -Math.pow(Math.abs(u) * 2, 1.5) * wv * 0.2, a = twist * v, c = Math.cos(a), s = Math.sin(a);
+    p.setXYZ(k, x * c - z * s, v * h, x * s + z * c + arch * v * v);
+    uv.setX(k, seed + 0.002 + uv.getX(k) * 0.996);
   }
-  blob(0.24, 0.24, -0.36, -0.33, 0.65);
+  geo.computeVertexNormals();
+  return geo;
+}
+function buildPlant() {
+  const M = G.M, g = new THREE.Group(), r = rng(11);
+  g.position.set(-0.36, 0, -0.33); G.scene.add(g);
+  const lathe = pts => mesh(new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 64), M.terracotta, 0, 0, 0, g);
+  lathe([[0, 0], [0.074, 0], [0.079, 0.003], [0.082, 0.013], [0.078, 0.014], [0.074, 0.006], [0, 0.006]]);                       // saucer
+  lathe([[0, 0.006], [0.049, 0.006], [0.052, 0.01], [0.066, 0.103], [0.075, 0.105], [0.078, 0.109], [0.079, 0.13],
+    [0.077, 0.135], [0.072, 0.136], [0.069, 0.133], [0.066, 0.116], [0.001, 0.116]]);                                          // pot, rolled rim
+  mesh(new THREE.CircleGeometry(0.0664, 48), M.soil, 0, 0.12, 0, g).rotation.x = -Math.PI / 2;
+  /* Three clumps off the rhizome, each a fan: the middle blades stand tallest, the outer ones lean away */
+  let seed = 0;
+  for (const [cx, cz, n] of [[-0.021, 0.008, 5], [0.022, -0.006, 4], [0.003, 0.027, 3]]) {
+    const face = r() * Math.PI * 2;
+    for (let j = 0; j < n; j++) {
+      const t = j / (n - 1) - 0.5, h = (0.47 - Math.abs(t) * 0.26) * (0.78 + r() * 0.3), w = 0.037 + r() * 0.02;
+      const leaf = mesh(leafGeo(h, w, (0.012 + r() * 0.04) * (0.5 + Math.abs(t) * 2.4), (r() - 0.5) * 1.1, seed++), M.leaf,
+        cx + Math.cos(face) * t * 0.016, 0.114, cz - Math.sin(face) * t * 0.016, g);
+      leaf.rotation.set(0.04 + r() * 0.08 + Math.abs(t) * 0.22, face + t * 1.1 + (r() - 0.5) * 0.35, t * 0.5, 'YXZ');
+    }
+  }
+  blob(0.27, 0.27, -0.36, -0.33, 0.65);
 }
 
 /* ───────── Coffee, floppies, poster ───────── */
+/* The mug sits in the lamplight, not out at the frame's corner: the overview's shifted lens
+   is wide, and round things near its bottom corners stretch and lean */
+const MUG = { x: 0.405, z: -0.035 };
 function buildMug() {
   const M = G.M, g = new THREE.Group();
-  g.position.set(0.455, 0, 0.115); g.rotation.y = -0.5; G.scene.add(g);
+  g.position.set(MUG.x, 0, MUG.z); g.rotation.y = -0.5; G.scene.add(g);
   const prof = [[0, 0], [0.037, 0], [0.04, 0.003], [0.041, 0.093], [0.0395, 0.096], [0.0365, 0.095], [0.0355, 0.006], [0.0005, 0.006]].map(([x, y]) => new THREE.Vector2(x, y));
   mesh(new THREE.LatheGeometry(prof, 56), M.enamel, 0, 0, 0, g);
   mesh(new THREE.TorusGeometry(0.038, 0.0021, 10, 56), M.enamelBlue, 0, 0.0955, 0, g).rotation.x = Math.PI / 2;
   mesh(new THREE.CircleGeometry(0.0356, 48), M.coffee, 0, 0.079, 0, g, false).rotation.x = -Math.PI / 2;
   mesh(new THREE.TorusGeometry(0.021, 0.0055, 14, 32, Math.PI), M.enamel, 0.04, 0.05, 0, g).rotation.z = -Math.PI / 2;
   const steam = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.18), steamMaterial());
-  steam.position.set(0.455, 0.18, 0.115); G.scene.add(steam);
-  blob(0.13, 0.13, 0.455, 0.115, 0.55);
+  steam.position.set(MUG.x, 0.18, MUG.z); G.scene.add(steam);
+  blob(0.13, 0.13, MUG.x, MUG.z, 0.55);
 }
 function buildFloppies() {
   const edge = new THREE.MeshStandardMaterial({ color: '#262629', roughness: 0.5 });
@@ -243,7 +303,7 @@ function buildFloppies() {
 }
 function buildPoster() {
   const M = G.M, g = new THREE.Group(), W = 0.3, H = 0.4, f = 0.012, d = 0.02;
-  g.position.set(0.43, 0.42, -0.492); G.scene.add(g);
+  g.position.set(0.555, 0.42, -0.492); G.scene.add(g);
   [[0, H / 2 - f / 2, W, f], [0, -H / 2 + f / 2, W, f], [-W / 2 + f / 2, 0, f, H], [W / 2 - f / 2, 0, f, H]]
     .forEach(([x, y, w, h]) => mesh(new THREE.BoxGeometry(w, h, d), M.paint, x, y, 0, g));
   mesh(new THREE.PlaneGeometry(W - 2 * f, H - 2 * f), new THREE.MeshStandardMaterial({ map: posterTexture(), roughness: 0.75 }), 0, 0, -0.002, g);

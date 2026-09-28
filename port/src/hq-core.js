@@ -2,8 +2,9 @@
    The Mac's screen stays real HTML. The 3D camera never rotates, only moves
    and shifts its lens, so the CRT always projects to an upright rectangle
    and the HTML screen can be pinned onto it with a plain 2D transform. */
-let THREE, RoundedBoxGeometry, EffectComposer, RenderPass, UnrealBloomPass, ShaderPass, OutputPass, RectAreaLightUniformsLib, RoomEnvironment;
-const G = { cur: null, anim: null, frame: 0, perf: [], dpr: 1, w: 0, h: 0, t: 0, glow: 0, screenOn: false, keys: new Map() };
+let THREE, RoundedBoxGeometry, EffectComposer, FullScreenQuad, UnrealBloomPass, ShaderPass, RectAreaLightUniformsLib;
+const G = { cur: null, anim: null, perf: [], dpr: 1, w: 0, h: 0, t: 0, glow: 0, zoomDim: 1, lamp: 0, litAt: 0, hover: 0, ptr: null, screenOn: false, dirty: true, keys: new Map(),
+  par: { x: 0, y: 0, tx: 0, ty: 0, w: 0, on: !reduceMotion && matchMedia('(hover: hover) and (pointer: fine)').matches } };
 const U = { time: { value: 0 } };
 const hqWrap = document.createElement('div');
 hqWrap.id = 'hq-screen';
@@ -28,6 +29,7 @@ function procMat(mat, o) {
       .replace('#include <common>', '#include <common>\nvarying vec3 vWP;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWP=(modelMatrix*vec4(transformed,1.)).xyz;');
     let f = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;\n' + GLSL_NOISE);
+    if (o.pre) f = f.replace('void main() {', `void main() {\n  vec3 pW=vWP; ${o.pre}`);
     if (o.albedo) f = f.replace('#include <map_fragment>', `#include <map_fragment>\n{ vec3 p=vWP; ${o.albedo} }`);
     if (o.rough) f = f.replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\n{ vec3 p=vWP; ${o.rough} }`);
     if (o.bump) f = f.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -115,6 +117,14 @@ function zoomState() {
 }
 const lerpState = (A, B, e) => { const o = {}; for (const k in A) o[k] = A[k] + (B[k] - A[k]) * e; return o; };
 const easeIO = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+/* Parallax: the pointer slides the camera a few centimetres and the lens shifts back,
+   so the Mac's front stays pinned while the keyboard and the wall drift apart */
+const PAR = { x: 0.05, y: 0.022, f: 0.96 };
+function withParallax(s) {
+  const P = G.par, dx = P.x * PAR.x * P.w, dy = -P.y * PAR.y * P.w;
+  if (!dx && !dy) return s;
+  return { x: s.x + dx, y: s.y + dy, z: s.z, l: s.l - dx / PAR.f, r: s.r - dx / PAR.f, t: s.t - dy / PAR.f, b: s.b - dy / PAR.f };
+}
 function applyCamera(s) {
   const c = G.camera;
   c.position.set(s.x, s.y, s.z);
@@ -128,7 +138,8 @@ function placeScreen() {
   const px = (v.x * 0.5 + 0.5) * G.w, py = (-v.y * 0.5 + 0.5) * G.h;
   v.set(x + G.SW / 2, y - G.SH / 2, z).project(G.camera);
   const s = ((v.x * 0.5 + 0.5) * G.w - px) / 640;
-  hqWrap.style.transform = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${s.toFixed(5)})`;
+  const tf = `translate(${px.toFixed(2)}px,${py.toFixed(2)}px) scale(${s.toFixed(5)})`;
+  if (tf !== G.tf) hqWrap.style.transform = G.tf = tf;
 }
 function resize() {
   G.w = innerWidth; G.h = innerHeight;
@@ -138,17 +149,55 @@ function resize() {
   G.composer.setSize(G.w, G.h);
   G.finalPass.uniforms.res.value.set(G.w * G.dpr, G.h * G.dpr);
   G.dust.material.uniforms.px.value = 1.4 * G.dpr;
+  G.dirty = true;
 }
 
 /* ───────── Frame loop ───────── */
-function updateLights(dt) {
-  G.glow += ((G.screenOn ? 1 : 0) - G.glow) * Math.min(1, dt * 5);
-  const f = (1 + (Math.random() - 0.5) * 0.035) * (G.zoomDim = (G.zoomDim ?? 1) + ((view.zoomed ? 0.45 : 1) - (G.zoomDim ?? 1)) * Math.min(1, dt * 3));
-  G.screenLight.intensity = 3 * G.glow * f;
-  G.glowMat.color.setRGB(1.7 * G.glow * f, 1.8 * G.glow * f, 1.78 * G.glow * f);
-  G.glowMesh.visible = G.glow > 0.01;
-  G.finalPass.uniforms.time.value = G.t;
-  G.finalPass.uniforms.vig.value += ((view.zoomed ? 0.35 : 1) - G.finalPass.uniforms.vig.value) * Math.min(1, dt * 3);
+const approach = (v, to, k) => { const n = v + (to - v) * k; return Math.abs(to - n) < 1e-3 ? to : n; };
+/* The lamp warms up once the room is revealed: a couple of stutters, then a filament glow */
+const LAMP_ON = [[0, 0], [0.07, 0.55], [0.12, 0.08], [0.2, 0.7], [0.25, 0.25], [0.34, 0.85], [0.9, 1]];
+function lampLevel() {
+  if (!G.litAt) return 0;
+  const t = (performance.now() - G.litAt) / 1000;
+  if (reduceMotion || t >= 0.9) return 1;
+  let i = 1; while (LAMP_ON[i][0] < t) i++;
+  const [t0, a] = LAMP_ON[i - 1], [t1, b] = LAMP_ON[i];
+  return a + (b - a) * (t - t0) / (t1 - t0);
+}
+/* Is the pointer over the Mac? (its front face, projected; the camera never rotates) */
+function overMac() {
+  if (!G.ptr || view.zoomed || G.anim) return false;
+  const v = G._hv || (G._hv = new THREE.Vector3());
+  v.set(-0.122, 0.006, 0.017).project(G.camera); const x0 = (v.x + 1) / 2 * G.w, y1 = (1 - v.y) / 2 * G.h;
+  v.set(0.122, 0.356, 0.017).project(G.camera); const x1 = (v.x + 1) / 2 * G.w, y0 = (1 - v.y) / 2 * G.h;
+  return G.ptr.x > x0 && G.ptr.x < x1 && G.ptr.y > y0 && G.ptr.y < y1;
+}
+/* Returns true while a fade (screen glow, lamp, hover, zoom dimming, vignette) is still moving */
+function updateLights(dt, idle) {
+  const u = G.finalPass.uniforms, before = G.glow + G.zoomDim + G.lamp + G.hover + u.vig.value, k3 = Math.min(1, dt * 3);
+  G.glow = approach(G.glow, G.screenOn ? 1 : 0, Math.min(1, dt * 5));
+  G.zoomDim = approach(G.zoomDim, view.zoomed ? 0.5 : 1, k3);
+  G.lamp = lampLevel();
+  /* Pointing at a switched-off Mac wakes a faint standby shimmer in the glass */
+  G.hover = approach(G.hover, !G.screenOn && overMac() ? 1 : 0, Math.min(1, dt * 6));
+  G.M.crt.emissive.setRGB(0.003 + 0.016 * G.hover, 0.004 + 0.021 * G.hover, 0.0034 + 0.02 * G.hover);
+  u.vig.value = approach(u.vig.value, view.zoomed ? 0.4 : 1, k3);
+  const f = (idle ? 1 : 1 + (Math.random() - 0.5) * 0.03) * G.zoomDim, g = G.glow * f;
+  G.screenLight.intensity = 2.4 * g;
+  G.glowMat.color.setRGB(1.06 * g, 1.13 * g, 1.17 * g);
+  G.haloMat.opacity = 0.42 * G.glow * (0.35 + 0.65 * G.zoomDim);
+  G.glowMesh.visible = G.haloMesh.visible = G.glow > 0.01;
+  G.setLamp(G.lamp);
+  u.time.value = G.t;
+  return G.glow + G.zoomDim + G.lamp + G.hover + u.vig.value !== before;
+}
+/* Eases the pointer offset; true while the camera is still moving */
+function parallax(dt) {
+  const P = G.par, x0 = P.x, y0 = P.y, w0 = P.w, k = Math.min(1, dt * 2.4);
+  P.w = approach(P.w, P.on && !view.zoomed ? 1 : 0, Math.min(1, dt * (view.zoomed ? 3 : 1.2)));
+  if (!P.w && !w0) return false; // parked while zoomed in: the pointer is working the screen, not the room
+  P.x = approach(P.x, P.tx, k); P.y = approach(P.y, P.ty, k);
+  return P.x !== x0 || P.y !== y0 || P.w !== w0;
 }
 function adapt(dt) {
   if (G.adapted) return;
@@ -167,18 +216,30 @@ function tick(now) {
   if (G.anim) {
     const k = Math.min(1, (now - G.anim.t0) / G.anim.dur);
     G.cur = lerpState(G.anim.from, G.anim.to, easeIO(k));
-    if (k >= 1) { G.anim = null; hqWrap.style.willChange = ''; }
+    if (k >= 1) { G.anim = null; hqWrap.style.willChange = view.zoomed ? '' : 'transform'; }
   }
-  applyCamera(G.cur); placeScreen(); updateLights(dt);
-  const idle = view.zoomed && !G.anim;
-  if (idle && ++G.frame % 3) return;
+  const drift = parallax(dt);
+  if (drift || G.applied !== G.cur) { applyCamera(withParallax(G.cur)); placeScreen(); G.applied = G.cur; }
+  /* Zoomed in, the room is out of view: render only while something changes */
+  const idle = view.zoomed && !G.anim, fading = updateLights(dt, idle);
+  if (idle && !fading && !drift && !G.dirty) return;
+  G.dirty = false;
   G.composer.render(dt);
-  if (!idle && !G.anim) adapt(dt);
+  if (!view.zoomed && !G.anim) adapt(dt);
 }
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  G.ptr = { x: e.clientX, y: e.clientY };
+  G.par.tx = Math.max(-1, Math.min(1, e.clientX / innerWidth * 2 - 1));
+  G.par.ty = Math.max(-1, Math.min(1, e.clientY / innerHeight * 2 - 1));
+}, { passive: true });
+document.documentElement.addEventListener('pointerleave', () => { G.par.tx = G.par.ty = 0; G.ptr = null; });
 
 /* ───────── Hooks the rest of the page calls ───────── */
 function hqApi() {
   window.__hq = G;
+  /* Revealed before the 3D room was ready (slow network): the lamp is simply on */
+  if (document.body.classList.contains('lit')) G.litAt = performance.now() - 1e4;
   Object.assign(HQ, {
     ready: true,
     setActive(on) {
@@ -186,13 +247,14 @@ function hqApi() {
       HQ.on = on;
       if (on) {
         hqWrap.append(screenEl);
-        resize(); G.cur = null; HQ.layout(false);
-        applyCamera(G.cur); placeScreen(); G.composer.render(0);
+        resize(); G.cur = null; G.tf = ''; HQ.layout(false);
+        G.par.w = 0; applyCamera(G.cur); placeScreen(); G.applied = G.cur; updateLights(0, true); G.composer.render(0);
+        hqWrap.style.willChange = view.zoomed ? '' : 'transform';
         document.body.classList.add('hq');
         clearTimeout(G.doneT); G.doneT = setTimeout(() => HQ.on && document.body.classList.add('hq-done'), 950);
       } else {
         glassHome.prepend(screenEl);
-        hqWrap.style.transform = '';
+        hqWrap.style.transform = ''; hqWrap.style.willChange = '';
         document.body.classList.remove('hq', 'hq-done');
       }
     },
@@ -203,14 +265,17 @@ function hqApi() {
         G.anim = { from: { ...G.cur }, to, t0: performance.now(), dur: 1450 };
         hqWrap.style.willChange = 'transform';
       } else { G.cur = to; G.anim = null; }
+      G.dirty = true;
     },
+    lightsUp() { if (!G.litAt) G.litAt = performance.now(); },
     power(on) { G.screenOn = on; },
     key(code, down) {
       const k = G.keys.get(code); if (!k) return;
       G._m = G._m || new THREE.Matrix4();
       G._m.compose(V3(k.p.x, k.p.y - (down ? 0.0022 : 0), k.p.z), new THREE.Quaternion(), k.s);
       G.keyMesh.setMatrixAt(k.i, G._m); G.keyMesh.instanceMatrix.needsUpdate = true;
+      G.renderer.shadowMap.needsUpdate = G.dirty = true;
     },
-    mouse(down) { if (G.mouseBtn) G.mouseBtn.position.y = G.mouseBtnY - (down ? 0.0012 : 0); }
+    mouse(down) { if (!G.mouseBtn) return; G.mouseBtn.position.y = G.mouseBtnY - (down ? 0.0012 : 0); G.renderer.shadowMap.needsUpdate = G.dirty = true; }
   });
 }

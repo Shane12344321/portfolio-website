@@ -84,4 +84,16 @@ body.zoomed .placard{opacity:0;transform:translateY(10px);pointer-events:none}
 .hud button:focus-visible{outline:2px solid var(--hud-ink);outline-offset:2px}
 body:not(.zoomed) #btn-back{display:none}
 
-@media (prefers-reduced-motion:reduce){.placard .cta::before{animation:none}}
+/* Opening: the room fades up from black once the first view is ready (and on its own after 4s, without JS) */
+.veil{position:fixed;inset:0;z-index:40;background:#030403;pointer-events:none;transition:opacity 1.5s cubic-bezier(.4,0,.2,1),visibility 0s 1.5s;animation:veil-late 0s 4s forwards}
+body.lit .veil{opacity:0;visibility:hidden}
+.veil::after{content:"Switching on the lamp…";position:absolute;left:0;right:0;top:50%;text-align:center;font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:rgba(235,232,224,.4);opacity:0;animation:hint .8s 1.4s forwards}
+body.lit .veil::after{animation-play-state:paused}
+@keyframes hint{to{opacity:1}}
+body.lit .placard{animation:rise .9s cubic-bezier(.2,.7,.2,1) .7s backwards}
+body.lit .hud{animation:fade .8s ease 1s backwards}
+@keyframes veil-late{to{opacity:0;visibility:hidden}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+@keyframes fade{from{opacity:0}}
+
+@media (prefers-reduced-motion:reduce){.placard .cta::before{animation:none}body.lit .placard,body.lit .hud{animation-name:fade}}

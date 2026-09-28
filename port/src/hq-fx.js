@@ -1,19 +1,4 @@
 /* ───────── Painted textures ───────── */
-function leafTexture() {
-  return canvasTex(128, 512, (x, W, H) => {
-    const g = x.createLinearGradient(0, 0, W, 0);
-    g.addColorStop(0, '#20391f'); g.addColorStop(0.5, '#2f5530'); g.addColorStop(1, '#1d3620');
-    x.fillStyle = g; x.fillRect(0, 0, W, H);
-    for (let y = 10; y < H; y += 14 + (y % 7)) {
-      x.strokeStyle = `rgba(150,190,120,${0.18 + (y % 5) * 0.03})`; x.lineWidth = 3 + (y % 4);
-      x.beginPath(); for (let px = 8; px <= W - 8; px += 6) x.lineTo(px, y + Math.sin(px * 0.09 + y) * 5); x.stroke();
-    }
-    const e = x.createLinearGradient(0, 0, W, 0);
-    e.addColorStop(0, '#c9c064'); e.addColorStop(0.07, 'rgba(201,192,100,.2)'); e.addColorStop(0.12, 'rgba(0,0,0,0)');
-    e.addColorStop(0.88, 'rgba(0,0,0,0)'); e.addColorStop(0.93, 'rgba(201,192,100,.2)'); e.addColorStop(1, '#c9c064');
-    x.fillStyle = e; x.fillRect(0, 0, W, H);
-  });
-}
 function posterTexture() {
   return canvasTex(768, 1040, (x, W, H) => {
     x.fillStyle = '#f3f0e8'; x.fillRect(0, 0, W, H);
@@ -25,10 +10,26 @@ function posterTexture() {
     x.fillStyle = '#1b1b19'; x.fillRect(m, m + 470, pw, 34);
     x.fillStyle = '#d8a13e'; x.fillRect(m, m + 526, pw * 0.56, 34);
     x.fillStyle = '#1b1b19'; x.font = 'italic 92px "Instrument Serif", Georgia, serif';
-    x.fillText('Systems', m + 34, m + ph - 170); x.fillText('that stay up.', m + 34, m + ph - 90);
+    x.fillText('Curiosity', m + 34, m + ph - 170); x.fillText('in motion.', m + 34, m + ph - 90);
     x.font = '500 20px "IBM Plex Mono", Menlo, monospace'; x.fillText('N° 07', m + 34, m + ph - 36);
-    x.textAlign = 'right'; x.fillText('BROOKLYN · 1984', m + pw - 34, m + ph - 36);
+    x.textAlign = 'right'; x.fillText('KOCHI · 1984', m + pw - 34, m + ph - 36);
     x.restore();
+    /* Paper tooth and a little foxing, so the print doesn't read as a flat texture */
+    const r = rng(5), im = x.getImageData(0, 0, W, H), d = im.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 14; d[i] += n; d[i + 1] += n; d[i + 2] += n * 0.9; }
+    x.putImageData(im, 0, 0);
+    const fox = x.createRadialGradient(W * 0.5, H * 0.45, H * 0.3, W * 0.5, H * 0.5, H * 0.75);
+    fox.addColorStop(0, 'rgba(120,90,40,0)'); fox.addColorStop(1, 'rgba(120,90,40,.16)');
+    x.fillStyle = fox; x.fillRect(0, 0, W, H);
+  });
+}
+/* CRT halation: light from the picture scattering in the faceplate, a soft rim around it */
+function haloTexture(gw, gh, sw, sh) {
+  const W = 256, H = Math.round(W * gh / gw);
+  return canvasTex(W, H, (x) => {
+    const p = rrect(new Path2D(), W * sw / gw, H * sh / gh, W * 0.03, W / 2, H / 2);
+    x.fillStyle = '#fff'; x.shadowColor = '#fff';
+    for (const [blur, a] of [[20, 0.35], [6, 0.85]]) { x.shadowBlur = blur; x.globalAlpha = a; x.fill(p); }
   });
 }
 function floppyTexture(label, sub) {
@@ -140,7 +141,9 @@ void main(){
   float trail=max(t1,t2);
   vec3 col=city(st,1.);
   if(D.m>.002){
-    vec3 lens=city(D.c-D.n*vec2(.05,.07),.42)*1.45+vec3(.03,.028,.03);
+    /* each drop is a tiny fisheye: it holds the whole street, upside down, lights at the top */
+    vec2 q=vec2(D.c.x-D.n.x*.2, clamp(.2-D.n.y*.19+(D.c.y-.5)*.05,.012,.62));
+    vec3 lens=city(q,.3)*1.5+vec3(.03,.028,.03);
     float e=length(D.n);
     lens*=1.-.6*smoothstep(.72,1.,e);
     lens+=vec3(1.,.82,.6)*smoothstep(.26,0.,length(D.n-vec2(.36,.4)))*.75;
@@ -178,12 +181,12 @@ function dustPoints(h, R, count) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('seed', new THREE.BufferAttribute(seed, 3));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { time: U.time, px: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { time: U.time, px: { value: 1 }, k: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: `uniform float time, px; attribute vec3 seed; varying float vA;
 void main(){ vec3 p=position; p.x+=sin(time*.21+seed.x*6.28)*.012; p.y+=sin(time*.13+seed.y*6.28)*.018; p.z+=cos(time*.17+seed.z*6.28)*.012;
   vec4 mv=modelViewMatrix*vec4(p,1.); gl_Position=projectionMatrix*mv;
   gl_PointSize=px*(1.2+seed.x*2.2)/(-mv.z); vA=.25+.75*(.5+.5*sin(time*(.6+seed.y)+seed.z*40.)); }`,
-    fragmentShader: 'varying float vA; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d)*vA*.55; gl_FragColor=vec4(vec3(1.,.86,.65)*a,1.); }'
+    fragmentShader: 'uniform float k; varying float vA; void main(){ float d=length(gl_PointCoord-.5); float a=smoothstep(.5,0.,d)*vA*.55*k; gl_FragColor=vec4(vec3(1.,.86,.65)*a,1.); }'
   });
   return new THREE.Points(geo, mat);
 }
@@ -205,14 +208,57 @@ void main(){ float y=vUv.y; float x=vUv.x-.5;
   });
 }
 
-/* Film finish: lens vignette, slight chromatic fringing, grain */
+/* Reflections: a stand-in for this room (dusk in the window, the lamp and the pool of light
+   it throws, the dim far wall) baked once into the environment map, so glossy things mirror
+   the studio instead of a generic white box */
+const ENV = { room: ['#101311', 1], dusk: ['#c98a70', 1.1], night: ['#2b3866', 0.9], bulb: ['#ffd9a8', 40], shade: ['#ffb877', 3], pool: ['#ff9e5e', 1.3], far: ['#4a3b2e', 3.2] };
+function roomReflections(k = ENV) {
+  const s = new THREE.Scene(), O = V3(0, 0.2, 0.05);
+  const lit = ([color, i], side = THREE.DoubleSide) => new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(i), side });
+  const glow = (geo, c, p, face) => { const m = new THREE.Mesh(geo, lit(c)); m.position.copy(p).sub(O); m.lookAt(face.clone().sub(O)); s.add(m); };
+  s.add(new THREE.Mesh(new THREE.BoxGeometry(7, 4.4, 7), lit(k.room, THREE.BackSide)));
+  glow(new THREE.PlaneGeometry(1.1, 0.55), k.dusk, V3(-0.98, 0.38, -0.62), O);     // dusk low in the window
+  glow(new THREE.PlaneGeometry(1.1, 0.75), k.night, V3(-0.98, 1.03, -0.62), O);    // night sky above it
+  glow(new THREE.CircleGeometry(0.035, 24), k.bulb, V3(0.2, 0.36, -0.06), O);      // the bulb
+  glow(new THREE.CircleGeometry(0.075, 32), k.shade, V3(0.21, 0.375, -0.08), O);   // inside of the shade
+  glow(new THREE.CircleGeometry(0.26, 40), k.pool, V3(0.2, 0, 0.03), V3(0.2, 1, 0.03)); // pool of light on the desk
+  glow(new THREE.PlaneGeometry(4.5, 1.8), k.far, V3(0, 0.9, 2.4), O);              // the far side of the room
+  return s;
+}
+
+/* Scene pass: draw the room into a 4x MSAA target, then resolve it into the
+   (single-sample) post-processing chain, dropping any NaN/Inf pixels on the way
+   so bloom can't smear them. Only this pass needs anti-aliasing. */
+function scenePass(scene, cam) {
+  const msaa = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+  const quad = new FullScreenQuad(new THREE.ShaderMaterial({
+    uniforms: { tDiffuse: { value: msaa.texture } }, vertexShader: VS_UV, depthTest: false, depthWrite: false,
+    fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c=texture2D(tDiffuse,vUv); if(any(isnan(c))||any(isinf(c))) c=vec4(0.,0.,0.,1.); gl_FragColor=vec4(min(c.rgb,vec3(64.)),1.); }'
+  }));
+  return {
+    enabled: true, needsSwap: true, clear: false, renderToScreen: false,
+    setSize(w, h) { msaa.setSize(w, h); },
+    render(r, write) { r.setRenderTarget(msaa); r.render(scene, cam); r.setRenderTarget(write); quad.render(r); },
+    dispose() { msaa.dispose(); quad.dispose(); }
+  };
+}
+
+/* Film finish: tone mapping (three.js supplies toneMapping() and the sRGB encode when
+   drawing to the screen), a light split-tone grade, lens vignette, chromatic fringing, grain */
 function finalShader() {
   return {
     uniforms: { tDiffuse: { value: null }, time: U.time, res: { value: new THREE.Vector2(1, 1) }, vig: { value: 1 } },
     vertexShader: VS_UV,
     fragmentShader: `uniform sampler2D tDiffuse; uniform float time, vig; uniform vec2 res; varying vec2 vUv;
+vec3 grade(vec3 c){
+  float l=dot(c,vec3(.2126,.7152,.0722));
+  c*=mix(vec3(.94,1.,1.07),vec3(1.),smoothstep(0.,.42,l));     /* night-blue shadows */
+  c*=mix(vec3(1.),vec3(1.04,1.,.94),smoothstep(.5,1.,l));      /* tungsten highlights */
+  return mix(vec3(l),c,1.06);
+}
 void main(){ vec2 c=vUv-.5; float d=dot(c,c); vec2 o=c*d*.005*vig;
-  vec3 col=vec3(texture2D(tDiffuse,vUv+o).r, texture2D(tDiffuse,vUv).g, texture2D(tDiffuse,vUv-o).b);
+  vec3 hdr=vec3(texture2D(tDiffuse,vUv+o).r, texture2D(tDiffuse,vUv).g, texture2D(tDiffuse,vUv-o).b);
+  vec3 col=grade(linearToOutputTexel(vec4(toneMapping(hdr),1.)).rgb);
   float v=smoothstep(.9,.2,length(c*vec2(1.,1.2))); col*=mix(1.,mix(.5,1.,v),vig);
   float g=fract(sin(dot(floor(vUv*res)+fract(time*7.3)*113., vec2(12.9898,78.233)))*43758.5453);
   col+=(g-.5)*.028;
