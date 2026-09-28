@@ -206,28 +206,38 @@ const WM = (() => {
     });
   }
 
-  /* Dragging and resizing draw a dotted outline, then commit, as in 1984 */
+  /* Dragging and resizing draw a dotted outline, then commit, as in 1984. The drag ends on
+     release, and also when the browser drops it (capture lost to a context menu or a blur, or
+     the button found already up), so a missed pointerup can't strand the outline */
+  const DRAG_END = ['pointerup', 'pointercancel', 'lostpointercapture'];
+  let endDrag = null;
   function track(e, win, mode) {
+    if (e.button !== 0) return;
     e.preventDefault();
+    endDrag?.();
     const el = win.el, k = scrScale(), sx = e.clientX, sy = e.clientY, t = e.currentTarget;
     const x0 = el.offsetLeft, y0 = el.offsetTop, w0 = el.offsetWidth, h0 = el.offsetHeight;
     const W = desktop.clientWidth, H = desktop.clientHeight;
     let nx = x0, ny = y0, nw = w0, nh = h0, moved = false, ol = null;
     t.setPointerCapture?.(e.pointerId);
     const mv = ev => {
+      if (!(ev.buttons & 1)) return up();
       const dx = (ev.clientX - sx) / k, dy = (ev.clientY - sy) / k;
-      if (!moved && Math.abs(dx) + Math.abs(dy) < 3) return;
+      if (!moved && Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 3) return;
       if (!moved) { moved = true; ol = document.createElement('div'); ol.className = 'outline'; desktop.append(ol); }
       if (mode === 'move') { nx = Math.round(Math.min(Math.max(x0 + dx, 48 - w0), W - 48)); ny = Math.round(Math.min(Math.max(y0 + dy, 0), H - 20)); }
       else { nw = Math.round(Math.min(Math.max(w0 + dx, 190), W - x0)); nh = Math.round(Math.min(Math.max(h0 + dy, 110), H - y0)); }
       Object.assign(ol.style, { left: nx + 'px', top: ny + 'px', width: nw + 'px', height: nh + 'px' });
     };
     const up = () => {
-      t.removeEventListener('pointermove', mv); t.removeEventListener('pointerup', up); t.removeEventListener('pointercancel', up);
+      if (endDrag !== up) return;
+      endDrag = null;
+      t.removeEventListener('pointermove', mv); DRAG_END.forEach(n => t.removeEventListener(n, up)); removeEventListener('blur', up);
       if (!moved) return; ol.remove();
       Object.assign(el.style, { left: nx + 'px', top: ny + 'px', width: nw + 'px', height: nh + 'px' });
     };
-    t.addEventListener('pointermove', mv); t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up);
+    endDrag = up;
+    t.addEventListener('pointermove', mv); DRAG_END.forEach(n => t.addEventListener(n, up)); addEventListener('blur', up);
   }
   function wire(win) {
     const el = win.el, cb = el.querySelector('.close');
