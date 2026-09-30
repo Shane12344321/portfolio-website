@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sakura Drive</title>
+  <script type="module" crossorigin src="./assets/index-NVV8Ahzj.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BXWPcyvz.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <div id="hud" class="hidden">
+    <div id="gauge">
+      <svg id="tach" viewBox="0 0 200 200" aria-hidden="true">
+        <path id="tach-bg" d="" />
+        <path id="tach-red" d="" />
+        <path id="tach-fill" d="" />
+      </svg>
+      <div id="speed"><span id="speed-val">0</span><small>km/h</small></div>
+      <div id="gear">N</div>
+      <div id="rpm-val">0 rpm</div>
+    </div>
+    <div id="assists"><span id="a-abs">ABS</span><span id="a-tcs">TCS</span><span id="a-stm">STM</span><span id="a-trans">AUTO</span></div>
+  </div>
+
+  <div id="hint" class="hidden">
+    <b>W / ↑</b> throttle &nbsp; <b>S / ↓</b> brake · reverse &nbsp; <b>A D / ← →</b> steer &nbsp; <b>Space</b> handbrake<br />
+    <b>Drag</b> look around the car &nbsp; <b>Wheel</b> zoom &nbsp; <b>C</b> camera &nbsp; <b>P</b> photo view<br />
+    <b>R</b> reset &nbsp; <b>M</b> manual (<b>E</b>/<b>Q</b> shift) &nbsp; <b>O</b> autopilot &nbsp; <b>Esc</b> menu
+  </div>
+
+  <div id="menu" class="hidden">
+    <div class="panel">
+      <h1>Sakura Drive</h1>
+      <div class="row"><label>Quality</label>
+        <div class="seg" data-key="quality"><button data-v="low">Low</button><button data-v="medium">Medium</button><button data-v="high">High</button></div></div>
+      <div class="row"><label>Transmission</label>
+        <div class="seg" data-key="manual"><button data-v="false">Auto</button><button data-v="true">Manual</button></div></div>
+      <div class="row"><label>ABS</label><div class="seg" data-key="abs"><button data-v="true">On</button><button data-v="false">Off</button></div></div>
+      <div class="row"><label>Traction control</label><div class="seg" data-key="tcs"><button data-v="true">On</button><button data-v="false">Off</button></div></div>
+      <div class="row"><label>Stability control</label><div class="seg" data-key="stm"><button data-v="true">On</button><button data-v="false">Off</button></div></div>
+      <div class="row"><label>Steering assist</label><div class="seg" data-key="steerAssist"><button data-v="true">On</button><button data-v="false">Off</button></div></div>
+      <div class="row"><label>Paint</label>
+        <div class="seg" data-key="paint"><button data-v="silver">Silver</button><button data-v="rosso">Rosso</button><button data-v="bianco">Bianco</button><button data-v="nero">Nero</button></div></div>
+      <div class="row"><label>Volume</label><input id="vol" type="range" min="0" max="1" step="0.05" value="0.7" /></div>
+      <p class="credits">Ferrari 458 Italia model by vicent091036 (via three.js examples). Textures: Poly Haven (CC0). Mt. Fuji terrain: GSI Japan (国土地理院).</p>
+      <button id="resume" class="primary">Drive</button>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="title">Sakura Drive</div>
+    <div id="load-msg">Loading…</div>
+    <button id="start" class="primary hidden">Click to drive</button>
+  </div>
+
+</body>
+</html>
