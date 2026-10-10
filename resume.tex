@@ -8,7 +8,11 @@
 \usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
-\input{glyphtounicode}
+\usepackage{iftex}
+\ifPDFTeX
+  \input{glyphtounicode}
+  \pdfgentounicode=1
+\fi
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -29,8 +33,6 @@
 \titleformat{\section}{
   \vspace{-4pt}\scshape\raggedright\large
 }{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
-
-\pdfgentounicode=1
 
 \newcommand{\resumeItem}[1]{
   \item\small{#1\vspace{-2pt}}
@@ -82,8 +84,8 @@
 \section{Experience}
 \resumeSubHeadingListStart
   \resumeSubheading
-    {South Indian Bank}{Kochi, India}
-    {AI Intern}{May 2026 -- Jun. 2026}
+    {The South Indian Bank Limited}{Kochi, India}
+    {AI Intern}{May 2026 -- June 2026}
   \resumeItemListStart
     \resumeItem{Built NoteForge, an AI-assisted QA platform that converts banking business-requirement documents into structured, traceable test cases using FastAPI, Pydantic, and LLM-based generation.}
     \resumeItem{Validated the system against digital-banking workflows spanning national eKYC identity verification (Aadhaar), core-banking integration (Finacle), and real-time payment rails (UPI/IMPS/NEFT/RTGS), including transaction limits and failure handling.}
@@ -124,9 +126,10 @@
 \section{Technical Skills}
 \begin{itemize}[leftmargin=0.15in,label={}]
   \small\item{
-    \textbf{Languages:} Python, C++, JavaScript, \LaTeX \\
-    \textbf{ML \& Interpretability:} JAX, Scikit-learn, linear probing, NetworkX \\
-    \textbf{Tools \& Infra:} FastAPI, Pydantic, Playwright, GitHub Actions, Git, WebSockets, Chrome Extensions, Telegram API
+    \textbf{Programming:} Python, SQL, C++, JavaScript \\
+    \textbf{Data Analysis:} Pandas, NumPy, Matplotlib, exploratory data analysis, data cleaning, data visualization \\
+    \textbf{Machine Learning:} scikit-learn, JAX, model evaluation, classification, regression, linear probing \\
+    \textbf{Development Tools:} Git, FastAPI, Pydantic, Playwright, GitHub Actions
   }
 \end{itemize}
 
