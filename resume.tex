@@ -96,6 +96,16 @@
 \section{Research \& Projects}
 \resumeSubHeadingListStart
   \resumeProjectHeading
+    {\textbf{Ask r/Vit: Retrieval-Augmented Question Answering} $|$ \emph{Python, OpenAI API, SQLite FTS5}}
+    {Nov. 2026}
+  \resumeItemListStart
+    \resumeItem{Built a cited question-answering system over the entire r/Vit subreddit (55,919 threads, 485K comments), fusing BM25 keyword and embedding search via reciprocal-rank fusion, followed by LLM re-ranking.}
+    \resumeItem{Extracted 102,568 structured facts with an LLM pass on the OpenAI Batch API, using a resumable, stall-tolerant job pipeline; total build cost about \$31.}
+    \resumeItem{Built a 430-question evaluation set and ablated retrieval designs (HyDE, re-rank pool size, whole-thread context): 95\% of answers correct or partially correct, with the source thread retrieved for 96\% of questions.}
+    \resumeItem{Added an agentic deep-research mode (multi-query search, whole-thread reading, cross-checking) with a hard per-query cost cap; a typical run does 15 searches over 50+ threads for about \$0.10.}
+  \resumeItemListEnd
+
+  \resumeProjectHeading
     {\textbf{Searchless Chess: Mechanistic Interpretability} $|$ \emph{Python, JAX, Scikit-learn}}
     {\href{https://github.com/Shane12344321}{\underline{GitHub}} $|$ Jun. 2026}
   \resumeItemListStart
@@ -112,15 +122,6 @@
     \resumeItem{Engineered adapters for seven ATS and career platforms, combining structured APIs with Playwright browser automation to monitor JavaScript-rendered career pages on scheduled GitHub Actions runs with no dedicated infrastructure.}
     \resumeItem{Designed for fault tolerance --- per-source health tracking, request budgets, and queued retries --- running unattended on a scheduled cadence.}
   \resumeItemListEnd
-
-  \resumeProjectHeading
-    {\textbf{Adaptive Shortest-Path Framework (ASPF)} $|$ \emph{C++, Python, Scikit-learn, NetworkX}}
-    {Feb. 2026}
-  \resumeItemListStart
-    \resumeItem{Developed a runtime system that dynamically selects among BFS, Dijkstra's algorithm, and Dial's algorithm by analyzing graph structural properties.}
-    \resumeItem{Trained a Random Forest classifier that correctly selects the fastest shortest-path algorithm on 88\% of held-out test graphs.}
-    \resumeItem{Improved execution time by up to 73\% over fixed Dijkstra baselines on sparse graphs and 58\% on uniform-weight graphs.}
-  \resumeItemListEnd
 \resumeSubHeadingListEnd
 
 \section{Technical Skills}
@@ -128,8 +129,8 @@
   \small\item{
     \textbf{Programming:} Python, SQL, C++, JavaScript \\
     \textbf{Data Analysis:} Pandas, NumPy, Matplotlib, exploratory data analysis, data cleaning, data visualization \\
-    \textbf{Machine Learning:} scikit-learn, JAX, model evaluation, classification, regression, linear probing \\
-    \textbf{Development Tools:} Git, FastAPI, Pydantic, Playwright, GitHub Actions
+    \textbf{Machine Learning:} scikit-learn, JAX, RAG, embeddings, LLM evaluation, model evaluation, linear probing \\
+    \textbf{Development Tools:} Git, FastAPI, Pydantic, SQLite, Playwright, GitHub Actions
   }
 \end{itemize}
 
