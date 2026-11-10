@@ -3,11 +3,115 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
-  <meta http-equiv="refresh" content="0; url=https://past-paper-atlas.iamehsan.chatgpt.site">
+  <meta name="description" content="Browse VIT past questions by subject, VTOP syllabus module, exam, and estimated difficulty.">
+  <meta name="theme-color" content="#f5f5ee">
   <title>Past Paper Atlas</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="data.js" defer></script>
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <p>Continue to <a href="https://past-paper-atlas.iamehsan.chatgpt.site">Past Paper Atlas</a>.</p>
+  <a class="skip-link" href="#study">Skip to questions</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="./index.html" aria-label="Past Paper Atlas home">
+        <span class="brand-mark"><img src="icon.svg" alt="" width="36" height="36"></span>
+        <span>Past Paper Atlas<span class="brand-caption">VIT · Fall 2026–27</span></span>
+      </a>
+      <button class="guide-button" id="show-guide" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8v1"/></svg>
+        <span>About this archive</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="subject-rail">
+      <div class="rail-heading"><h2>Subjects</h2><span class="mono" id="subject-total"></span></div>
+      <nav class="subjects" id="subjects" aria-label="Subjects"></nav>
+      <div class="mobile-subject">
+        <label for="subject-select" class="small-label">Subject</label>
+        <select id="subject-select"></select>
+      </div>
+      <div class="rail-foot" id="rail-foot"></div>
+    </aside>
+
+    <main id="study" tabindex="-1">
+      <section class="module-header" aria-labelledby="module-title">
+        <div class="module-head-inner">
+          <p class="eyebrow" id="course-label"></p>
+          <h1 id="module-title">Past questions</h1>
+          <p id="module-meta" class="module-meta"></p>
+          <div class="module-picker">
+            <span class="small-label" id="modules-label">Browse modules</span>
+            <nav id="modules" aria-labelledby="modules-label"></nav>
+          </div>
+        </div>
+      </section>
+      <details id="syllabus" class="syllabus">
+        <summary><span>Topics in the current syllabus</span><span class="syllabus-caption">VTOP · Fall 2026–27</span></summary>
+        <ul id="syllabus-topics"></ul>
+      </details>
+
+      <div class="filter-bar">
+        <div class="filter-label">
+          <span class="small-label" id="difficulty-label">Estimated difficulty</span>
+          <div class="difficulty" id="difficulty" role="group" aria-labelledby="difficulty-label"></div>
+        </div>
+        <p id="result-count" class="mono" role="status"></p>
+      </div>
+      <nav id="exam-jumps" class="exam-jumps" aria-label="Jump to exam group"></nav>
+      <div id="results"></div>
+      <noscript><p class="empty">Enable JavaScript to browse the archive.</p></noscript>
+    </main>
+  </div>
+
+  <dialog id="guide" aria-labelledby="guide-title">
+    <div class="dialog-bar">
+      <h2 id="guide-title">About this archive</h2>
+      <form method="dialog"><button class="close-button" aria-label="Close archive guide">×</button></form>
+    </div>
+    <div class="guide-content">
+      <p id="guide-coverage"></p>
+      <p>Module tags follow the Fall 2026–27 VTOP syllabi. A question can appear in multiple modules. Older questions without a clear match appear under <strong>Unmatched</strong> when available.</p>
+      <p>Each card uses screenshots from the source paper. Select an image to enlarge it. When a matching answer key is available, open <strong>Solution from paper</strong> below the question.</p>
+      <h3>Estimated difficulty</h3>
+      <dl>
+        <div><dt>Easy</dt><dd>Recall, explain, or apply a familiar idea in one step.</dd></div>
+        <div><dt>Medium</dt><dd>Apply a standard method or reason through a structured scenario.</dd></div>
+        <div><dt>Hard</dt><dd>Work through several steps, synthesize topics, or design under constraints.</dd></div>
+      </dl>
+      <p class="fine-print">Counts describe the papers in this archive. Difficulty estimates are independent of official marks.</p>
+      <div id="coverage-notes"></div>
+    </div>
+  </dialog>
+
+  <dialog id="scan-dialog" class="scan-dialog" aria-labelledby="scan-title">
+    <div class="dialog-bar">
+      <h2 id="scan-title">Source scan</h2>
+      <div class="dialog-actions">
+        <button class="guide-button" type="button" id="scan-zoom" aria-pressed="false">Full size</button>
+        <form method="dialog"><button class="close-button" aria-label="Close scan">×</button></form>
+      </div>
+    </div>
+    <div class="large-scan" id="large-scan"></div>
+  </dialog>
+
+  <template id="question-card">
+    <article class="question">
+      <header class="question-head">
+        <div class="question-ref"><h3></h3><p class="paper-meta"></p></div>
+        <span class="difficulty-tag"></span>
+      </header>
+      <div class="question-scans"></div>
+      <p class="source-note" hidden></p>
+      <details class="solution" hidden>
+        <summary>Solution from paper</summary>
+        <div class="solution-scans"></div>
+      </details>
+    </article>
+  </template>
 </body>
 </html>
