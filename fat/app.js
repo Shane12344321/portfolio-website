@@ -2,6 +2,7 @@
 
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
+const cloudAnswers = window.ATLAS_CLOUD_ANSWERS;
 const model = window.AtlasModel;
 
 if (data?.subjects?.length && model) initialize();
@@ -187,6 +188,10 @@ function initialize() {
       note.textContent = item.note;
       note.hidden = false;
     }
+    const answer = item.subject === "cloud" && cloudAnswers?.[item.id];
+    if (answer) {
+      article.querySelector(".solution").before(modelAnswer(answer));
+    }
     if (item.solutions.length) {
       const solution = article.querySelector(".solution");
       solution.hidden = false;
@@ -234,6 +239,29 @@ function initialize() {
     figure.append(link, caption);
     return figure;
   }
+}
+
+function modelAnswer(answer) {
+  const details = el("details", "model-answer");
+  details.append(el("summary", "", "Model answer"));
+  const body = el("div", "model-answer-body");
+  const sections = [
+    ["Direct answer", answer.answer],
+    ["Key points", answer.points],
+    ["Diagram or example", answer.example],
+  ];
+  for (const [label, bullets] of sections) {
+    const list = el("ul");
+    for (const bullet of bullets) {
+      const item = el("li");
+      if (bullet.includes("\n")) item.append(el("pre", "model-answer-code", bullet));
+      else item.textContent = bullet;
+      list.append(item);
+    }
+    body.append(el("h4", "", label), list);
+  }
+  details.append(body);
+  return details;
 }
 
 function updatePressed(group, value) {

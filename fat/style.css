@@ -67,7 +67,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; letter-sp
 .syllabus { margin-top: 11px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
 summary { cursor: pointer; }
 .syllabus summary { padding: 11px 14px; font-size: .81rem; font-weight: 700; }
-.syllabus summary::marker, .solution summary::marker { color: #386b4e; }
+.syllabus summary::marker, .solution summary::marker, .model-answer summary::marker { color: #386b4e; }
 .syllabus-caption { float: right; color: var(--muted); font-size: .71rem; font-weight: 550; }
 .syllabus ul { margin: 0; padding: 0 30px 14px 33px; color: var(--muted); font-size: .81rem; }
 .syllabus li + li { margin-top: 4px; }
@@ -108,9 +108,17 @@ summary { cursor: pointer; }
 .scan-caption { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: .69rem; padding: 3px 1px 0; }
 .scan-caption a { text-decoration: underline; text-underline-offset: 2px; }
 .source-note { font-size: .78rem; color: var(--muted); margin: 7px 0 0; }
-.solution { margin-top: 9px; border: 1px solid #d9e4d5; border-radius: 8px; background: #f0f5ed; }
-.solution summary { padding: 9px 11px; font-size: .81rem; font-weight: 700; color: #254e37; }
+.solution, .model-answer { margin-top: 9px; border: 1px solid #d9e4d5; border-radius: 8px; background: #f0f5ed; }
+.solution summary, .model-answer summary { padding: 9px 11px; font-size: .81rem; font-weight: 700; color: #254e37; }
 .solution-scans { padding: 0 9px 9px; }
+.model-answer summary { min-height: 44px; padding: 12px; }
+.model-answer[open] summary { border-bottom: 1px solid #d9e4d5; }
+.model-answer-body { padding: 13px 14px 15px; font-size: .9rem; line-height: 1.55; overflow-wrap: anywhere; }
+.model-answer-body h4 { margin: 0 0 4px; color: #254e37; font-size: .82rem; }
+.model-answer-body ul { margin: 0; padding-inline-start: 1.25rem; }
+.model-answer-body ul + h4 { margin-top: 13px; }
+.model-answer-body li + li { margin-top: 5px; }
+.model-answer-code { margin: 4px 0; padding: 9px; border: 1px solid #d9e4d5; border-radius: 6px; background: var(--panel); font: .78rem/1.5 var(--mono); white-space: pre-wrap; }
 
 dialog { border: 1px solid var(--line-dark); border-radius: 14px; color: var(--ink); background: var(--panel); width: min(93vw, 600px); max-height: 90dvh; padding: 0; box-shadow: 0 22px 65px #172b2442; }
 dialog::backdrop { background: #172b24a6; }
