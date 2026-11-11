@@ -3,6 +3,7 @@
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
 const cloudAnswers = window.ATLAS_CLOUD_ANSWERS;
+const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
 
 if (data?.subjects?.length && model) initialize();
@@ -16,10 +17,13 @@ function initialize() {
   const difficulty = $("#difficulty");
   const number = new Intl.NumberFormat("en-IN");
   const guide = $("#guide");
+  const fatGuide = $("#fat-guide");
+  const fatGuideContent = $("#fat-guide-content");
   const viewer = $("#scan-dialog");
   const largeScan = $("#large-scan");
   const zoom = $("#scan-zoom");
   let moduleSubject = null;
+  let activeFatGuide;
 
   const questionCount = (count, label = "question") => number.format(count) + " " + label + (count === 1 ? "" : "s");
 
@@ -128,6 +132,7 @@ function initialize() {
     const syllabus = $("#syllabus");
     syllabus.hidden = !module;
     $("#syllabus-topics").replaceChildren(...(module?.topics ?? []).map(topic => el("li", "", topic)));
+    renderFatGuide(subject.id === "cloud" ? cloudGuides?.[module?.id] : undefined);
     $("#result-count").textContent = questionCount(total) + " shown";
 
     const content = [];
@@ -171,6 +176,21 @@ function initialize() {
     }
     $("#exam-jumps").replaceChildren(...jumps);
     $("#results").replaceChildren(...content);
+  }
+
+  function renderFatGuide(nextGuide) {
+    if (nextGuide === activeFatGuide) return;
+    activeFatGuide = nextGuide;
+    fatGuide.open = false;
+    fatGuide.hidden = !nextGuide;
+    fatGuideContent.replaceChildren();
+    if (nextGuide) {
+      fatGuideContent.append(bulletSections([
+        ["Common FAT question patterns", nextGuide.patterns],
+        ["What to learn", nextGuide.learn],
+        ["What to write", nextGuide.write],
+      ], "h2"));
+    }
   }
 
   function questionCard(item, examLabel) {
@@ -245,11 +265,17 @@ function modelAnswer(answer) {
   const details = el("details", "model-answer");
   details.append(el("summary", "", "Model answer"));
   const body = el("div", "model-answer-body");
-  const sections = [
+  body.append(bulletSections([
     ["Direct answer", answer.answer],
     ["Key points", answer.points],
     ["Diagram or example", answer.example],
-  ];
+  ], "h4"));
+  details.append(body);
+  return details;
+}
+
+function bulletSections(sections, headingTag) {
+  const content = document.createDocumentFragment();
   for (const [label, bullets] of sections) {
     const list = el("ul");
     for (const bullet of bullets) {
@@ -258,10 +284,9 @@ function modelAnswer(answer) {
       else item.textContent = bullet;
       list.append(item);
     }
-    body.append(el("h4", "", label), list);
+    content.append(el(headingTag, "", label), list);
   }
-  details.append(body);
-  return details;
+  return content;
 }
 
 function updatePressed(group, value) {

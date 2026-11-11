@@ -67,10 +67,14 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; letter-sp
 .syllabus { margin-top: 11px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
 summary { cursor: pointer; }
 .syllabus summary { padding: 11px 14px; font-size: .81rem; font-weight: 700; }
-.syllabus summary::marker, .solution summary::marker, .model-answer summary::marker { color: #386b4e; }
+.syllabus summary::marker, .solution summary::marker, .model-answer summary::marker, .fat-guide summary::marker { color: #386b4e; }
 .syllabus-caption { float: right; color: var(--muted); font-size: .71rem; font-weight: 550; }
 .syllabus ul { margin: 0; padding: 0 30px 14px 33px; color: var(--muted); font-size: .81rem; }
 .syllabus li + li { margin-top: 4px; }
+.fat-guide { margin-top: 11px; border: 1px solid #c5d9be; border-radius: 10px; background: #f0f5ed; }
+.fat-guide summary { min-height: 44px; padding: 12px 14px; color: #254e37; font-size: .9rem; font-weight: 750; }
+.fat-guide[open] summary { border-bottom: 1px solid #d9e4d5; }
+.fat-guide-note { margin: 0 0 12px; color: var(--muted); font-size: .78rem; }
 
 .filter-bar { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 9px 18px; margin-top: 23px; }
 .filter-label { display: grid; gap: 7px; }
@@ -113,11 +117,11 @@ summary { cursor: pointer; }
 .solution-scans { padding: 0 9px 9px; }
 .model-answer summary { min-height: 44px; padding: 12px; }
 .model-answer[open] summary { border-bottom: 1px solid #d9e4d5; }
-.model-answer-body { padding: 13px 14px 15px; font-size: .9rem; line-height: 1.55; overflow-wrap: anywhere; }
-.model-answer-body h4 { margin: 0 0 4px; color: #254e37; font-size: .82rem; }
-.model-answer-body ul { margin: 0; padding-inline-start: 1.25rem; }
-.model-answer-body ul + h4 { margin-top: 13px; }
-.model-answer-body li + li { margin-top: 5px; }
+.model-answer-body, .fat-guide-body { padding: 13px 14px 15px; font-size: .9rem; line-height: 1.55; overflow-wrap: anywhere; }
+.model-answer-body h4, .fat-guide-body h2 { margin: 0 0 4px; color: #254e37; font-size: .82rem; }
+.model-answer-body ul, .fat-guide-body ul { margin: 0; padding-inline-start: 1.25rem; }
+.model-answer-body ul + h4, .fat-guide-body ul + h2 { margin-top: 13px; }
+.model-answer-body li + li, .fat-guide-body li + li { margin-top: 5px; }
 .model-answer-code { margin: 4px 0; padding: 9px; border: 1px solid #d9e4d5; border-radius: 6px; background: var(--panel); font: .78rem/1.5 var(--mono); white-space: pre-wrap; }
 
 dialog { border: 1px solid var(--line-dark); border-radius: 14px; color: var(--ink); background: var(--panel); width: min(93vw, 600px); max-height: 90dvh; padding: 0; box-shadow: 0 22px 65px #172b2442; }

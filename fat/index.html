@@ -7,11 +7,12 @@
   <meta name="theme-color" content="#f5f5ee">
   <title>Past Paper Atlas</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=cloud-answers">
+  <link rel="stylesheet" href="style.css?v=cloud-guides">
   <script src="data.js" defer></script>
   <script src="answers-cloud.js" defer></script>
+  <script src="guides-cloud.js" defer></script>
   <script src="model.js" defer></script>
-  <script src="app.js?v=cloud-answers" defer></script>
+  <script src="app.js?v=cloud-guides" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#study">Skip to questions</a>
@@ -51,6 +52,13 @@
           </div>
         </div>
       </section>
+      <details id="fat-guide" class="fat-guide" hidden>
+        <summary>FAT guide</summary>
+        <div class="fat-guide-body">
+          <p class="fat-guide-note">Based on five archived FAT papers. Counts are by paper and include OR choices.</p>
+          <div id="fat-guide-content"></div>
+        </div>
+      </details>
       <details id="syllabus" class="syllabus">
         <summary><span>Topics in the current syllabus</span><span class="syllabus-caption">VTOP · Fall 2026–27</span></summary>
         <ul id="syllabus-topics"></ul>
