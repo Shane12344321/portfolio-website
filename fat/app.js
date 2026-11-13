@@ -3,6 +3,7 @@
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
 const cloudAnswers = window.ATLAS_CLOUD_ANSWERS;
+const osAnswers = window.ATLAS_OS_ANSWERS;
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
 
@@ -208,7 +209,8 @@ function initialize() {
       note.textContent = item.note;
       note.hidden = false;
     }
-    const answer = item.subject === "cloud" && cloudAnswers?.[item.id];
+    const answer = item.subject === "cloud" ? cloudAnswers?.[item.id]
+      : item.subject === "os" && !item.solutions.length ? osAnswers?.[item.id] : undefined;
     if (answer) {
       article.querySelector(".solution").before(modelAnswer(answer));
     }
@@ -217,6 +219,7 @@ function initialize() {
       solution.hidden = false;
       function loadSolution() {
         if (!solution.open) return;
+        if (item.solutionNote) solution.querySelector(".solution-scans").append(el("p", "source-note", item.solutionNote));
         solution.querySelector(".solution-scans").append(...item.solutions.map(scan => scanFigure(item, scan, "Solution")));
         solution.removeEventListener("toggle", loadSolution);
       }
@@ -263,12 +266,13 @@ function initialize() {
 
 function modelAnswer(answer) {
   const details = el("details", "model-answer");
-  details.append(el("summary", "", "Model answer"));
+  details.append(el("summary", "", answer.sources?.length ? "Model answer · based on notes" : "Model answer"));
   const body = el("div", "model-answer-body");
   body.append(bulletSections([
     ["Direct answer", answer.answer],
     ["Key points", answer.points],
     ["Diagram or example", answer.example],
+    ...(answer.sources?.length ? [["Notes and references", answer.sources]] : []),
   ], "h4"));
   details.append(body);
   return details;
