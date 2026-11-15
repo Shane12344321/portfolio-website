@@ -26,6 +26,7 @@ function initialize() {
   const viewer = $("#scan-dialog");
   const largeScan = $("#large-scan");
   const zoom = $("#scan-zoom");
+  const aiStudyGuide = $("#ai-study-guide");
   let moduleSubject = null;
   let activeFatGuide;
 
@@ -72,8 +73,20 @@ function initialize() {
   window.addEventListener("popstate", () => {
     filters = model.selection(data, location.search);
     render();
+    jumpToQuestion();
   });
   render();
+  jumpToQuestion();
+
+  function jumpToQuestion() {
+    if (!location.hash.startsWith("#question-")) return;
+    const question = document.getElementById(location.hash.slice(1));
+    if (!question) return;
+    const openAnswer = new URLSearchParams(location.search).get("answer") === "1";
+    const answer = openAnswer && question.querySelector(".model-answer");
+    if (answer) answer.open = true;
+    requestAnimationFrame(() => (answer || question).scrollIntoView());
+  }
 
   function changeSubject(id) {
     if (id === filters.subject) return;
@@ -133,6 +146,9 @@ function initialize() {
     $("#module-meta").textContent = filters.module === 0
       ? questionCount(allDifficulties) + " without a clear match in the current syllabus"
       : questionCount(allDifficulties) + " in the local paper collection";
+    aiStudyGuide.hidden = subject.id !== "ai";
+    const guidePath = location.protocol === "file:" ? "ai/index.html" : "ai/";
+    aiStudyGuide.href = guidePath + (module ? "?module=" + module.id : "");
     const syllabus = $("#syllabus");
     syllabus.hidden = !module;
     $("#syllabus-topics").replaceChildren(...(module?.topics ?? []).map(topic => el("li", "", topic)));
@@ -199,6 +215,7 @@ function initialize() {
 
   function questionCard(item, examLabel) {
     const article = $("#question-card").content.firstElementChild.cloneNode(true);
+    article.id = "question-" + item.id;
     const paper = [examLabel, item.slot === "Unknown" ? "Slot unknown" : item.slot, item.year === "Unknown" ? "Year unknown" : item.year];
     article.querySelector("h3").textContent = item.label;
     article.querySelector(".paper-meta").textContent = paper.join(" · ");
