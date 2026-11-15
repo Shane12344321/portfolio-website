@@ -27,6 +27,7 @@ function initialize() {
   const largeScan = $("#large-scan");
   const zoom = $("#scan-zoom");
   const aiStudyGuide = $("#ai-study-guide");
+  const dbStudyGuide = $("#db-study-guide");
   let moduleSubject = null;
   let activeFatGuide;
 
@@ -149,6 +150,11 @@ function initialize() {
     aiStudyGuide.hidden = subject.id !== "ai";
     const guidePath = location.protocol === "file:" ? "ai/index.html" : "ai/";
     aiStudyGuide.href = guidePath + (module ? "?module=" + module.id : "");
+    if (dbStudyGuide) {
+      dbStudyGuide.hidden = subject.id !== "dbms";
+      const dbGuidePath = location.protocol === "file:" ? "db/index.html" : "db/";
+      dbStudyGuide.href = dbGuidePath + (module ? "#module-" + module.id : "");
+    }
     const syllabus = $("#syllabus");
     syllabus.hidden = !module;
     $("#syllabus-topics").replaceChildren(...(module?.topics ?? []).map(topic => el("li", "", topic)));
