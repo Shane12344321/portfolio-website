@@ -10,10 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
-  <link rel="stylesheet" href="study.css?v=1">
+  <link rel="stylesheet" href="study.css?v=depth-1">
   <script src="../data.js?v=os-notes-1" defer></script>
-  <script src="study-data.js?v=1" defer></script>
-  <script src="study.js?v=1" defer></script>
+  <script src="study-data.js?v=depth-1" defer></script>
+  <script src="study-analysis.js?v=depth-1" defer></script>
+  <script src="study.js?v=depth-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#modules">Skip to modules</a>
@@ -46,7 +47,7 @@
       <div><strong>14</strong> <span>CAT papers</span></div>
       <details class="method">
         <summary>How we count</summary>
-        <p>FAT covers 2023–24 to 2025–26. CAT includes eight CAT 1 and six CAT 2 papers. A topic counts once per paper, including OR alternatives. Topics can overlap. The counts describe this archive.</p>
+        <p>FAT covers 2023–24 to 2025–26. CAT includes eight CAT 1 and six CAT 2 papers. A topic counts once per paper, including OR options. May 2024 B1 lets students choose 10 of 12 questions. Counts reflect what was available to attempt.</p>
       </details>
     </div>
 
@@ -63,7 +64,10 @@
             <h2 id="module-title"></h2>
             <p id="module-lead"></p>
           </div>
-          <a class="archive-link module-archive" id="module-in-atlas" href="../?subject=ai">Questions and answers <span aria-hidden="true">↗</span></a>
+          <div class="module-links">
+            <a class="archive-link" href="#patterns"><span id="pattern-jump-label">FAT breakdown</span> <span aria-hidden="true">↓</span></a>
+            <a class="archive-link" id="module-in-atlas" href="../?subject=ai">Questions and answers <span aria-hidden="true">↗</span></a>
+          </div>
         </header>
 
         <div class="overview">
@@ -77,12 +81,24 @@
           </section>
         </div>
 
+        <section class="patterns" id="patterns" aria-labelledby="patterns-title">
+          <div class="section-head">
+            <h3 id="patterns-title">Inside the FAT questions</h3>
+            <span>Open a pattern for variants and answer steps</span>
+          </div>
+          <div id="fat-patterns"></div>
+        </section>
+
         <section class="evidence" aria-labelledby="evidence-title">
           <div class="section-head">
             <h3 id="evidence-title">FAT, paper by paper</h3>
             <span id="evidence-count"></span>
           </div>
           <p class="section-context" id="variation"></p>
+          <details id="chronology" class="chronology" hidden>
+            <summary>Compare the years and slots</summary>
+            <p id="chronology-text"></p>
+          </details>
           <div id="fat-evidence"></div>
         </section>
 

@@ -24,11 +24,6 @@ window.AI_STUDY_GUIDES = {
       "Virtual assistant PEAS and justification of its environment properties.",
     ],
     practiceSource: "CAT 1 practice",
-    practice: [
-      { ref: ["CAT1", "2025–26", "D1", "Q1"], title: "Build PEAS and justify the environment", why: "The smart-home case mirrors the combined structure of FAT D1 and D2." },
-      { ref: ["CAT1", "2026–27", "B1", "Q2"], title: "Compare two environments", why: "Classify the taxi and factory arm across six dimensions. Add design consequences to prepare for FAT E2." },
-      { ref: ["CAT1", "2025–26", "D1", "Q2"], title: "Choose and draw an architecture", why: "The Roomba case prepares you for the goal-based diagram in FAT B1 and the goal–utility distinction." },
-    ],
   },
   2: {
     short: "Search",
@@ -56,11 +51,6 @@ window.AI_STUDY_GUIDES = {
       "Step-by-step UCS priority queue and search comparisons, followed by Greedy versus A*.",
     ],
     practiceSource: "CAT 1 practice",
-    practice: [
-      { ref: ["CAT1", "2023–24", "B1", "Q4"], title: "Solve a graph that reappears in FAT", why: "FAT 2025–26 D1 Q3 reuses the graph and heuristics, with E–Z reduced from 5 to 4. Compare the resulting ties.", followup: ["FAT", "2025–26", "D1", "Q3"] },
-      { ref: ["CAT1", "2023–24", "B2", "Q4"], title: "Trace the UCS queue", why: "Track costs, alphabetical ties and multiple goals ahead of FAT 2025–26 D2 Q2." },
-      { ref: ["CAT1", "2026–27", "B1", "Q4"], title: "Model states and trace searches", why: "The formulation plus BFS, DFS and IDS transfers to FAT D1 Q2 and E2 Q2–Q3." },
-    ],
   },
   3: {
     short: "Local search",
@@ -87,11 +77,6 @@ window.AI_STUDY_GUIDES = {
       "Minimax and pruning with a faint leaf in the scan, plus GA mechanics and comparison.",
     ],
     practiceSource: "CAT 1 and CAT 2 practice",
-    practice: [
-      { ref: ["CAT2", "2025–26", "D1", "Q1"], title: "Trace alpha–beta in both orders", why: "Compare the branches pruned left-to-right and right-to-left before tracing FAT D1 or E1." },
-      { ref: ["CAT1", "2025–26", "D1", "Q5"], title: "Explain why annealing escapes", why: "Write both algorithms and explain the local maximum. Adapt the example to FAT E2’s plateau." },
-      { ref: ["CAT1", "2023–24", "B2", "Q5(a)"], title: "Rank chromosomes by fitness", why: "Warm up with the CAT calculation, then work one full generation for the FAT E2 machine schedule.", followup: ["FAT", "2024–25", "E2", "Q5"] },
-    ],
   },
   4: {
     short: "Logic",
@@ -117,11 +102,6 @@ window.AI_STUDY_GUIDES = {
       "FOL translation and propositional resolution, then both chaining methods and unification. The picnic conclusion admits a counterexample.",
     ],
     practiceSource: "CAT 2 practice",
-    practice: [
-      { ref: ["CAT2", "2025–26", "D2", "Q2"], title: "Translate, unify and resolve", why: "The graduation proof and separate quantifier questions match FAT D1 Q6 and the format of D2 Q6.", followup: ["FAT", "2025–26", "D1", "Q6"] },
-      { ref: ["CAT2", "2025–26", "D2", "Q3"], title: "Chain in both directions", why: "The chaining and named-rule subparts prepare you for FAT D2 Q7 and D1 Q5." },
-      { ref: ["CAT2", "2024–25", "E1", "Q4"], title: "Turn quantified English into clauses", why: "Practise uniqueness, comparisons and FOL-to-CNF. For validity and satisfiability, finish with the FAT E2 alternative.", followup: ["FAT", "2024–25", "E2", "Q9(b)"] },
-    ],
   },
   5: {
     short: "Probability",
@@ -146,11 +126,6 @@ window.AI_STUDY_GUIDES = {
       "A migraine posterior with a case split. The supplied marginal rates require an explicit dependence assumption.",
     ],
     practiceSource: "CAT 2 practice",
-    practice: [
-      { ref: ["CAT2", "2025–26", "D2", "Q4"], title: "Solve a training table reused in FAT", why: "Part B has the same ten training rows and query as FAT E1 Q4, with renamed features. Part A mirrors FAT E2’s diagnostic posterior.", followup: ["FAT", "2024–25", "E1", "Q4"] },
-      { ref: ["CAT2", "2025–26", "D1", "Q5"], title: "Sum over a hidden variable", why: "Part A practises marginalization for the sprinkler-network alternative in FAT E2 Q10(b)." },
-      { ref: ["CAT2", "2025–26", "D2", "Q5"], title: "Multiply factors for a joint query", why: "Use the factors attached to each node. This transfers directly to the B1 and E1 FAT networks." },
-    ],
   },
   6: {
     short: "Planning",
@@ -177,12 +152,7 @@ window.AI_STUDY_GUIDES = {
       "OR choice between blocks-world partial-order planning and a London-trip HTN with STRIPS.",
       "OR choice between hybrid forward/backward planning and a kitchen-robot STRIPS plan.",
     ],
-    practiceSource: "FAT practice",
-    practice: [
-      { ref: ["FAT", "2025–26", "D1", "Q9(a)"], title: "Write operators and causal links", why: "Practise STRIPS and partial order together. Explain which clearing actions can swap order." },
-      { ref: ["FAT", "2023–24", "B1", "Q8"], title: "Decompose a task with an HTN", why: "Take a vacation goal from compound tasks down to primitive actions with STRIPS schemas." },
-      { ref: ["FAT", "2024–25", "E2", "Q6"], title: "Trace forward and backward search", why: "Trace both directions on one maze. State whether the shaded goal cell is traversable." },
-    ],
+    practiceSource: "FAT practice + CAT prerequisite",
   },
   7: {
     short: "Perception",
@@ -209,11 +179,6 @@ window.AI_STUDY_GUIDES = {
       "OR choice between probabilistic language ambiguity, and IR versus IE for a chatbot.",
     ],
     practiceSource: "FAT practice · no direct CAT questions",
-    practice: [
-      { ref: ["FAT", "2025–26", "D1", "Q10(a)"], title: "Write the retrieval workflow", why: "Walk through the pipeline and explain a metric that judges the ranked results." },
-      { ref: ["FAT", "2025–26", "D2", "Q10(b)"], title: "Compare IR and IE in one example", why: "Show a chatbot retrieving sources, then pulling out the structured information it needs." },
-      { ref: ["FAT", "2024–25", "E2", "Q8"], title: "Reason through image retrieval", why: "For each challenge, give an approach and explain how you would test whether it helps." },
-    ],
   },
   8: {
     short: "Issues",
@@ -231,10 +196,5 @@ window.AI_STUDY_GUIDES = {
     variation: "",
     papers: [],
     practiceSource: "Syllabus-based practice",
-    practice: [
-      { title: "Explain a misleading post", why: "Pick an example and explain how missing context or an unsupported claim makes it misleading." },
-      { title: "Assess a claim", why: "List the checks you would run on the source, date and evidence. Say what would change your assessment." },
-      { title: "Choose a response", why: "Compare verifying, correcting and reporting a claim. Justify your choice using the evidence." },
-    ],
   },
 };
