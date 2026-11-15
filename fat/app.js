@@ -2,8 +2,11 @@
 
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
-const cloudAnswers = window.ATLAS_CLOUD_ANSWERS;
-const osAnswers = window.ATLAS_OS_ANSWERS;
+const answersBySubject = {
+  ai: window.ATLAS_AI_ANSWERS,
+  cloud: window.ATLAS_CLOUD_ANSWERS,
+  os: window.ATLAS_OS_ANSWERS,
+};
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
 
@@ -209,8 +212,8 @@ function initialize() {
       note.textContent = item.note;
       note.hidden = false;
     }
-    const answer = item.subject === "cloud" ? cloudAnswers?.[item.id]
-      : item.subject === "os" && !item.solutions.length ? osAnswers?.[item.id] : undefined;
+    const showAnswer = item.subject !== "os" || !item.solutions.length;
+    const answer = showAnswer ? answersBySubject[item.subject]?.[item.id] : undefined;
     if (answer) {
       article.querySelector(".solution").before(modelAnswer(answer));
     }
