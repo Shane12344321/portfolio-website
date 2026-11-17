@@ -30,6 +30,7 @@ function initialize() {
   const dbStudyGuide = $("#db-study-guide");
   let moduleSubject = null;
   let activeFatGuide;
+  let moduleClickTimer;
   let storage;
   try { storage = window.localStorage; } catch { /* Progress remains available for this visit. */ }
   const progress = window.AtlasProgress.createProgress(data.questions, storage);
@@ -75,12 +76,14 @@ function initialize() {
   });
 
   window.addEventListener("popstate", () => {
+    clearTimeout(moduleClickTimer);
     filters = model.selection(data, location.search);
     render();
     jumpToQuestion();
   });
   window.addEventListener("storage", event => {
-    if (event.storageArea !== storage || (event.key !== null && !event.key.startsWith(window.AtlasProgress.STORAGE_PREFIX))) return;
+    const prefixes = [window.AtlasProgress.STORAGE_PREFIX, window.AtlasProgress.MODULE_MARK_PREFIX];
+    if (event.storageArea !== storage || (event.key !== null && !prefixes.some(prefix => event.key.startsWith(prefix)))) return;
     progress.reload();
     for (const article of document.querySelectorAll("#results .question")) updateQuestionProgress(article);
     renderProgress();
@@ -110,6 +113,7 @@ function initialize() {
   }
 
   function setFilters(next) {
+    clearTimeout(moduleClickTimer);
     if (Object.keys(next).every(key => next[key] === filters[key])) return;
     const query = new URLSearchParams({
       subject: next.subject,
@@ -143,7 +147,20 @@ function initialize() {
         const control = button("", "module-button");
         control.append(el("span", "module-name", isModule ? "M" + option.id : option.name), el("span", "module-progress"));
         control.dataset.value = option.id;
-        control.addEventListener("click", () => setFilters({ ...filters, module: option.id }));
+        control.addEventListener("mousedown", event => {
+          if (event.detail > 1) event.preventDefault();
+        });
+        control.addEventListener("click", event => {
+          clearTimeout(moduleClickTimer);
+          if (event.detail >= 2) {
+            progress.markModule(subject.id, option.id, event.detail === 2 ? "orange" : "green");
+            renderProgress();
+          } else {
+            const next = { ...filters, module: option.id };
+            if (event.detail === 0) setFilters(next);
+            else moduleClickTimer = setTimeout(() => setFilters(next), 550);
+          }
+        });
         return control;
       }));
       moduleSubject = subject.id;
@@ -215,13 +232,18 @@ function initialize() {
     for (const control of modules.children) {
       const id = control.dataset.value === "all" ? "all" : Number(control.dataset.value);
       const count = progress.summary(subject.id, id);
+      const mark = progress.moduleMark(subject.id, id);
       const label = subject.modules.find(item => item.id === id);
       const name = label ? "Module " + id + " · " + label.name : control.querySelector(".module-name").textContent;
-      const description = name + " · " + count.done + " of " + count.total + " questions done";
-      control.querySelector(".module-progress").textContent = (count.complete ? "✓ " : "") + count.done + "/" + count.total;
+      const description = name + " · " + count.done + " of " + count.total + " questions done" +
+        (mark ? " · " + (mark === "green" ? "Dark green" : "Orange") + " checklist mark" : "");
+      const checked = mark === "green" || (!mark && count.complete);
+      control.querySelector(".module-progress").textContent = (checked ? "✓ " : "") + count.done + "/" + count.total;
+      if (mark) control.dataset.mark = mark;
+      else delete control.dataset.mark;
       control.classList.toggle("is-complete", count.complete);
       control.setAttribute("aria-label", description);
-      control.title = description;
+      control.title = description + ". Double-click to mark orange. Triple-click to mark dark green.";
     }
     const count = progress.summary(subject.id, filters.module);
     const description = filters.module === 0 ? " without a clear match in the current syllabus" : " in the local paper collection";

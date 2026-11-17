@@ -2,10 +2,12 @@
   "use strict";
 
   const STORAGE_PREFIX = "past-paper-atlas.done.v1.";
+  const MODULE_MARK_PREFIX = "past-paper-atlas.module-mark.v1.";
 
   function createProgress(questions, storage) {
     const knownIds = new Set(questions.map(item => item.id));
     let completed = new Set();
+    const moduleMarks = new Map();
     let persistent = Boolean(storage);
 
     function reload() {
@@ -16,6 +18,7 @@
           if (storage.getItem(STORAGE_PREFIX + id) === "1") saved.add(id);
         }
         completed = saved;
+        moduleMarks.clear();
       } catch {
         persistent = false;
       }
@@ -42,17 +45,44 @@
       return { done, total: items.length, complete: items.length > 0 && done === items.length };
     }
 
+    function moduleMark(subject, module) {
+      const key = subject + "." + module;
+      if (!moduleMarks.has(key)) {
+        let mark = "";
+        try {
+          if (persistent) mark = storage.getItem(MODULE_MARK_PREFIX + key);
+        } catch {
+          persistent = false;
+        }
+        moduleMarks.set(key, mark === "orange" || mark === "green" ? mark : "");
+      }
+      return moduleMarks.get(key);
+    }
+
+    function markModule(subject, module, mark) {
+      const key = subject + "." + module;
+      moduleMarks.set(key, mark);
+      if (!persistent) return;
+      try {
+        storage.setItem(MODULE_MARK_PREFIX + key, mark);
+      } catch {
+        persistent = false;
+      }
+    }
+
     reload();
     return {
       has: id => completed.has(id),
       toggle,
       reload,
       summary,
+      moduleMark,
+      markModule,
       get persistent() { return persistent; },
     };
   }
 
-  const api = { createProgress, STORAGE_PREFIX };
+  const api = { createProgress, STORAGE_PREFIX, MODULE_MARK_PREFIX };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.AtlasProgress = api;
 })(globalThis);
