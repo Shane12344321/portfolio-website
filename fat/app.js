@@ -94,7 +94,11 @@ function initialize() {
     if (!question) return;
     const openAnswer = new URLSearchParams(location.search).get("answer") === "1";
     const answer = openAnswer && question.querySelector(".model-answer");
-    if (answer) answer.open = true;
+    if (answer) {
+      question.querySelector(".question-body").hidden = false;
+      updateQuestionProgress(question);
+      answer.open = true;
+    }
     requestAnimationFrame(() => (answer || question).scrollIntoView());
   }
 
@@ -229,11 +233,20 @@ function initialize() {
 
   function updateQuestionProgress(article) {
     const done = progress.has(article.dataset.questionId);
+    const wasDone = article.classList.contains("is-done");
+    const body = article.querySelector(".question-body");
+    body.hidden = done && (!wasDone || body.hidden);
     article.classList.toggle("is-done", done);
+    article.classList.toggle("is-collapsed", body.hidden);
     const control = article.querySelector(".completion-button");
     control.textContent = done ? "✓ Done" : "Mark done";
     control.setAttribute("aria-pressed", String(done));
     control.setAttribute("aria-label", (done ? "Mark as unfinished, " : "Mark as done, ") + article.dataset.questionLabel);
+    const collapse = article.querySelector(".question-collapse");
+    collapse.hidden = !done;
+    collapse.textContent = body.hidden ? "Show question" : "Hide question";
+    collapse.setAttribute("aria-expanded", String(!body.hidden));
+    collapse.setAttribute("aria-controls", body.id);
   }
 
   function renderFatGuide(nextGuide) {
@@ -257,7 +270,13 @@ function initialize() {
     const paper = [examLabel, item.slot === "Unknown" ? "Slot unknown" : item.slot, item.year === "Unknown" ? "Year unknown" : item.year];
     article.dataset.questionId = item.id;
     article.dataset.questionLabel = item.label + ", " + paper.join(", ");
+    const body = article.querySelector(".question-body");
+    body.id = "question-body-" + item.id;
     updateQuestionProgress(article);
+    article.querySelector(".question-collapse").addEventListener("click", () => {
+      body.hidden = !body.hidden;
+      updateQuestionProgress(article);
+    });
     article.querySelector(".completion-button").addEventListener("click", () => {
       progress.toggle(item.id);
       updateQuestionProgress(article);

@@ -7,7 +7,9 @@
   <meta name="theme-color" content="#f5f5ee">
   <title>Past Paper Atlas</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=question-progress-1">
+  <link rel="stylesheet" href="style.css?v=markup-1">
+  <link rel="stylesheet" href="markup.css?v=markup-1">
+  <script src="markup.js?v=markup-1" defer></script>
   <script src="data.js?v=os-notes-1" defer></script>
   <script src="answers-cloud.js" defer></script>
   <script src="answers-os.js?v=os-notes-1" defer></script>
@@ -15,7 +17,7 @@
   <script src="guides-cloud.js" defer></script>
   <script src="model.js" defer></script>
   <script src="progress.js?v=question-progress-1" defer></script>
-  <script src="app.js?v=question-progress-1" defer></script>
+  <script src="app.js?v=markup-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#study">Skip to questions</a>
@@ -121,15 +123,18 @@
         <div class="question-ref"><h3></h3><p class="paper-meta"></p></div>
         <div class="question-actions">
           <span class="difficulty-tag"></span>
+          <button class="question-collapse" type="button" aria-expanded="false" hidden>Show question</button>
           <button class="completion-button" type="button" aria-pressed="false">Mark done</button>
         </div>
       </header>
-      <div class="question-scans"></div>
-      <p class="source-note" hidden></p>
-      <details class="solution" hidden>
-        <summary>Solution from paper</summary>
-        <div class="solution-scans"></div>
-      </details>
+      <div class="question-body">
+        <div class="question-scans"></div>
+        <p class="source-note" hidden></p>
+        <details class="solution" hidden>
+          <summary>Solution from paper</summary>
+          <div class="solution-scans"></div>
+        </details>
+      </div>
     </article>
   </template>
 </body>
