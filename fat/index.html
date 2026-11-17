@@ -7,14 +7,15 @@
   <meta name="theme-color" content="#f5f5ee">
   <title>Past Paper Atlas</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=cloud-guides">
+  <link rel="stylesheet" href="style.css?v=question-progress-1">
   <script src="data.js?v=os-notes-1" defer></script>
   <script src="answers-cloud.js" defer></script>
   <script src="answers-os.js?v=os-notes-1" defer></script>
   <script src="answers-ai.js?v=ai-answers-1" defer></script>
   <script src="guides-cloud.js" defer></script>
   <script src="model.js" defer></script>
-  <script src="app.js?v=db-study-guide-1" defer></script>
+  <script src="progress.js?v=question-progress-1" defer></script>
+  <script src="app.js?v=question-progress-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#study">Skip to questions</a>
@@ -48,6 +49,7 @@
           <p class="eyebrow" id="course-label"></p>
           <h1 id="module-title">Past questions</h1>
           <p id="module-meta" class="module-meta"></p>
+          <p id="progress-status" class="progress-status" role="status">Progress saved in this browser.</p>
           <a id="ai-study-guide" class="guide-button" href="ai/" hidden>AI FAT Study Guide <span aria-hidden="true">↗</span></a>
           <a id="db-study-guide" class="guide-button" href="db/" hidden>DBMS FAT Study Guide <span aria-hidden="true">↗</span></a>
           <div class="module-picker">
@@ -117,7 +119,10 @@
     <article class="question">
       <header class="question-head">
         <div class="question-ref"><h3></h3><p class="paper-meta"></p></div>
-        <span class="difficulty-tag"></span>
+        <div class="question-actions">
+          <span class="difficulty-tag"></span>
+          <button class="completion-button" type="button" aria-pressed="false">Mark done</button>
+        </div>
       </header>
       <div class="question-scans"></div>
       <p class="source-note" hidden></p>

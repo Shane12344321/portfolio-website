@@ -30,6 +30,9 @@ function initialize() {
   const dbStudyGuide = $("#db-study-guide");
   let moduleSubject = null;
   let activeFatGuide;
+  let storage;
+  try { storage = window.localStorage; } catch { /* Progress remains available for this visit. */ }
+  const progress = window.AtlasProgress.createProgress(data.questions, storage);
 
   const questionCount = (count, label = "question") => number.format(count) + " " + label + (count === 1 ? "" : "s");
 
@@ -76,6 +79,12 @@ function initialize() {
     render();
     jumpToQuestion();
   });
+  window.addEventListener("storage", event => {
+    if (event.storageArea !== storage || (event.key !== null && !event.key.startsWith(window.AtlasProgress.STORAGE_PREFIX))) return;
+    progress.reload();
+    for (const article of document.querySelectorAll("#results .question")) updateQuestionProgress(article);
+    renderProgress();
+  });
   render();
   jumpToQuestion();
 
@@ -114,7 +123,6 @@ function initialize() {
     const module = subject.modules.find(item => item.id === filters.module);
     const groups = model.groupQuestions(data, filters);
     const total = groups.reduce((sum, group) => sum + group.items.length, 0);
-    const allDifficulties = courseQuestions.filter(item => filters.module === "all" || item.modules.includes(filters.module)).length;
 
     updatePressed(subjects, subject.id);
     subjectSelect.value = subject.id;
@@ -128,13 +136,9 @@ function initialize() {
       if (courseQuestions.some(item => item.modules.includes(0))) options.push({ id: 0, name: "Unmatched" });
       modules.replaceChildren(...options.map(option => {
         const isModule = typeof option.id === "number" && option.id > 0;
-        const control = button(isModule ? "M" + option.id : option.name, "module-button");
+        const control = button("", "module-button");
+        control.append(el("span", "module-name", isModule ? "M" + option.id : option.name), el("span", "module-progress"));
         control.dataset.value = option.id;
-        if (isModule) {
-          const fullName = "Module " + option.id + " · " + option.name;
-          control.setAttribute("aria-label", fullName);
-          control.title = fullName;
-        }
         control.addEventListener("click", () => setFilters({ ...filters, module: option.id }));
         return control;
       }));
@@ -144,9 +148,6 @@ function initialize() {
 
     $("#course-label").textContent = [subject.code, subject.name, module && "Module " + module.id].filter(Boolean).join(" / ");
     $("#module-title").textContent = module?.name ?? (filters.module === 0 ? "Unmatched questions" : "All modules");
-    $("#module-meta").textContent = filters.module === 0
-      ? questionCount(allDifficulties) + " without a clear match in the current syllabus"
-      : questionCount(allDifficulties) + " in the local paper collection";
     aiStudyGuide.hidden = subject.id !== "ai";
     const guidePath = location.protocol === "file:" ? "ai/index.html" : "ai/";
     aiStudyGuide.href = guidePath + (module ? "?module=" + module.id : "");
@@ -202,6 +203,37 @@ function initialize() {
     }
     $("#exam-jumps").replaceChildren(...jumps);
     $("#results").replaceChildren(...content);
+    renderProgress();
+  }
+
+  function renderProgress() {
+    const subject = data.subjects.find(item => item.id === filters.subject);
+    for (const control of modules.children) {
+      const id = control.dataset.value === "all" ? "all" : Number(control.dataset.value);
+      const count = progress.summary(subject.id, id);
+      const label = subject.modules.find(item => item.id === id);
+      const name = label ? "Module " + id + " · " + label.name : control.querySelector(".module-name").textContent;
+      const description = name + " · " + count.done + " of " + count.total + " questions done";
+      control.querySelector(".module-progress").textContent = (count.complete ? "✓ " : "") + count.done + "/" + count.total;
+      control.classList.toggle("is-complete", count.complete);
+      control.setAttribute("aria-label", description);
+      control.title = description;
+    }
+    const count = progress.summary(subject.id, filters.module);
+    const description = filters.module === 0 ? " without a clear match in the current syllabus" : " in the local paper collection";
+    $("#module-meta").textContent = questionCount(count.total) + description + " · " + count.done + "/" + count.total + " done";
+    $("#progress-status").textContent = progress.persistent
+      ? "Progress saved in this browser."
+      : "Browser storage is unavailable. Progress is kept for this visit.";
+  }
+
+  function updateQuestionProgress(article) {
+    const done = progress.has(article.dataset.questionId);
+    article.classList.toggle("is-done", done);
+    const control = article.querySelector(".completion-button");
+    control.textContent = done ? "✓ Done" : "Mark done";
+    control.setAttribute("aria-pressed", String(done));
+    control.setAttribute("aria-label", (done ? "Mark as unfinished, " : "Mark as done, ") + article.dataset.questionLabel);
   }
 
   function renderFatGuide(nextGuide) {
@@ -223,6 +255,14 @@ function initialize() {
     const article = $("#question-card").content.firstElementChild.cloneNode(true);
     article.id = "question-" + item.id;
     const paper = [examLabel, item.slot === "Unknown" ? "Slot unknown" : item.slot, item.year === "Unknown" ? "Year unknown" : item.year];
+    article.dataset.questionId = item.id;
+    article.dataset.questionLabel = item.label + ", " + paper.join(", ");
+    updateQuestionProgress(article);
+    article.querySelector(".completion-button").addEventListener("click", () => {
+      progress.toggle(item.id);
+      updateQuestionProgress(article);
+      renderProgress();
+    });
     article.querySelector("h3").textContent = item.label;
     article.querySelector(".paper-meta").textContent = paper.join(" · ");
     const badge = article.querySelector(".difficulty-tag");
