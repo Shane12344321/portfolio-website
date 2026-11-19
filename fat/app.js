@@ -6,6 +6,7 @@ const answersBySubject = {
   ai: window.ATLAS_AI_ANSWERS,
   cloud: window.ATLAS_CLOUD_ANSWERS,
   os: window.ATLAS_OS_ANSWERS,
+  dbms: window.ATLAS_DBMS_ANSWERS,
 };
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
