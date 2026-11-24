@@ -7,6 +7,7 @@ const answersBySubject = {
   cloud: window.ATLAS_CLOUD_ANSWERS,
   os: window.ATLAS_OS_ANSWERS,
   dbms: window.ATLAS_DBMS_ANSWERS,
+  networks: window.ATLAS_NETWORKS_ANSWERS,
 };
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
@@ -376,10 +377,13 @@ function modelAnswer(answer) {
   const details = el("details", "model-answer");
   details.append(el("summary", "", answer.sources?.length ? "Model answer · based on notes" : "Model answer"));
   const body = el("div", "model-answer-body");
-  body.append(bulletSections([
+  const sections = answer.sections ?? [
     ["Direct answer", answer.answer],
     ["Key points", answer.points],
     ["Diagram or example", answer.example],
+  ];
+  body.append(bulletSections([
+    ...sections.filter(([, items]) => items?.length),
     ...(answer.sources?.length ? [["Notes and references", answer.sources]] : []),
   ], "h4"));
   details.append(body);
@@ -392,13 +396,62 @@ function bulletSections(sections, headingTag) {
     const list = el("ul");
     for (const bullet of bullets) {
       const item = el("li");
-      if (bullet.includes("\n")) item.append(el("pre", "model-answer-code", bullet));
+      if (typeof bullet === "object") {
+        item.className = "answer-block";
+        item.append(answerBlock(bullet));
+      } else if (bullet.includes("\n")) item.append(el("pre", "model-answer-code", bullet));
       else item.textContent = bullet;
       list.append(item);
     }
     content.append(el(headingTag, "", label), list);
   }
   return content;
+}
+
+// Rich answer blocks: a table, an inline SVG diagram, or a figure cropped from the notes.
+function answerBlock(block) {
+  const figure = el("figure", "answer-figure");
+  if (block.table) {
+    const wrap = el("div", "answer-table-wrap");
+    const table = el("table", "answer-table");
+    if (block.table.head) {
+      const row = el("tr");
+      for (const cell of block.table.head) row.append(el("th", "", String(cell)));
+      const thead = el("thead");
+      thead.append(row);
+      table.append(thead);
+    }
+    const tbody = el("tbody");
+    for (const cells of block.table.rows) {
+      const row = el("tr");
+      for (const cell of cells) row.append(el("td", "", String(cell)));
+      tbody.append(row);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    figure.append(wrap);
+  } else if (block.svg) {
+    const wrap = el("div", "answer-svg");
+    wrap.innerHTML = block.svg;
+    const svg = wrap.querySelector("svg");
+    if (svg && block.alt) { svg.setAttribute("role", "img"); svg.setAttribute("aria-label", block.alt); }
+    figure.append(wrap);
+  } else if (block.img) {
+    const link = el("a", "answer-image");
+    link.href = block.img;
+    link.target = "_blank";
+    link.rel = "noopener";
+    const image = el("img");
+    image.src = block.img;
+    image.alt = block.alt || block.caption || "Diagram from the notes";
+    image.loading = "lazy";
+    image.decoding = "async";
+    if (block.width) { image.width = block.width; image.height = block.height; }
+    link.append(image);
+    figure.append(link);
+  }
+  if (block.caption) figure.append(el("figcaption", "", block.caption));
+  return figure;
 }
 
 function updatePressed(group, value) {

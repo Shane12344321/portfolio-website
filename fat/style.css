@@ -138,6 +138,21 @@ summary { cursor: pointer; }
 .model-answer-body ul, .fat-guide-body ul { margin: 0; padding-inline-start: 1.25rem; }
 .model-answer-body ul + h4, .fat-guide-body ul + h2 { margin-top: 13px; }
 .model-answer-body li + li, .fat-guide-body li + li { margin-top: 5px; }
+.model-answer-body li.answer-block, .model-answer-body li:has(> pre) { list-style: none; margin-inline-start: -1.25rem; }
+.answer-figure { margin: 8px 0 10px; }
+.answer-figure figcaption { margin-top: 4px; color: var(--muted); font-size: .74rem; }
+.answer-table-wrap { overflow-x: auto; max-width: 100%; border: 1px solid #d9e4d5; border-radius: 6px; background: var(--panel); }
+.answer-table { border-collapse: collapse; width: 100%; font-size: .8rem; line-height: 1.4; overflow-wrap: normal; }
+.answer-table th, .answer-table td { padding: 5px 9px; border-bottom: 1px solid #e3e9df; text-align: left; vertical-align: top; }
+.answer-table th { white-space: nowrap; }
+.answer-table td { min-width: 4.5ch; font-variant-numeric: tabular-nums; }
+.answer-table td:first-child { font-weight: 600; }
+.answer-table th { background: #e6efe0; color: #254e37; font-size: .74rem; font-weight: 700; }
+.answer-table tr:last-child td { border-bottom: 0; }
+.answer-svg { overflow-x: auto; max-width: 100%; padding: 8px; border: 1px solid #d9e4d5; border-radius: 6px; background: #fff; }
+.answer-svg svg { display: block; max-width: 100%; height: auto; margin: 0 auto; overflow-wrap: normal; }
+.answer-image { display: block; padding: 6px; border: 1px solid #d9e4d5; border-radius: 6px; background: #fff; cursor: zoom-in; }
+.answer-image img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
 .model-answer-code { margin: 4px 0; padding: 9px; border: 1px solid #d9e4d5; border-radius: 6px; background: var(--panel); font: .78rem/1.5 var(--mono); white-space: pre; overflow-x: auto; max-width: 100%; }
 
 dialog { border: 1px solid var(--line-dark); border-radius: 14px; color: var(--ink); background: var(--panel); width: min(93vw, 600px); max-height: 90dvh; padding: 0; box-shadow: 0 22px 65px #172b2442; }
