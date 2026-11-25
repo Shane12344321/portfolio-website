@@ -145,7 +145,7 @@ summary { cursor: pointer; }
 .answer-table { border-collapse: collapse; width: 100%; font-size: .8rem; line-height: 1.4; overflow-wrap: normal; }
 .answer-table th, .answer-table td { padding: 5px 9px; border-bottom: 1px solid #e3e9df; text-align: left; vertical-align: top; }
 .answer-table th { white-space: nowrap; }
-.answer-table td { min-width: 4.5ch; font-variant-numeric: tabular-nums; }
+.answer-table td { min-width: 4.5ch; font-variant-numeric: tabular-nums; white-space: pre-line; }
 .answer-table td:first-child { font-weight: 600; }
 .answer-table th { background: #e6efe0; color: #254e37; font-size: .74rem; font-weight: 700; }
 .answer-table tr:last-child td { border-bottom: 0; }

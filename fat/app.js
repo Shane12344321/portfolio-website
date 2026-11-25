@@ -8,6 +8,7 @@ const answersBySubject = {
   os: window.ATLAS_OS_ANSWERS,
   dbms: window.ATLAS_DBMS_ANSWERS,
   networks: window.ATLAS_NETWORKS_ANSWERS,
+  compiler: window.ATLAS_COMPILER_ANSWERS,
 };
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
