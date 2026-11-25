@@ -3,48 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Browse VIT past questions by subject, VTOP syllabus module, exam, and estimated difficulty.">
+  <meta name="description" content="Browse VIT Compiler Design past questions by VTOP syllabus module, exam, and estimated difficulty.">
   <meta name="theme-color" content="#f5f5ee">
-  <title>Past Paper Atlas</title>
+  <title>Compiler Design · Past Paper Atlas</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=perf-1">
-  <script>
-    // Model answers are large, so each subject's file loads on demand instead of all six up front.
-    // Bump a file's ?v= here after editing it.
-    window.AtlasAnswers = (function () {
-      var files = {
-        ai: ["answers-ai.js?v=ai-answers-1", "ATLAS_AI_ANSWERS"],
-        cloud: ["answers-cloud.js?v=cloud-answers-1", "ATLAS_CLOUD_ANSWERS"],
-        os: ["answers-os.js?v=os-notes-1", "ATLAS_OS_ANSWERS"],
-        dbms: ["answers-dbms.js?v=dbms-answers-1", "ATLAS_DBMS_ANSWERS"],
-        networks: ["answers-networks.js?v=cn-answers-1", "ATLAS_NETWORKS_ANSWERS"],
-        compiler: ["answers-compiler.js?v=cd-answers-2", "ATLAS_COMPILER_ANSWERS"]
-      };
-      var pending = {};
-      function load(subject) {
-        var file = files[subject];
-        if (!file) return Promise.resolve(undefined);
-        if (!pending[subject]) pending[subject] = new Promise(function (resolve) {
-          var script = document.createElement("script");
-          script.src = file[0];
-          script.async = true;
-          script.onload = function () { resolve(window[file[1]]); };
-          script.onerror = function () { delete pending[subject]; resolve(undefined); };
-          document.head.appendChild(script);
-        });
-        return pending[subject];
-      }
-      // Start the current subject's answers now, alongside the question index.
-      var subject = new URLSearchParams(location.search).get("subject");
-      load(files[subject] ? subject : "ai");
-      return { load: load };
-    })();
-  </script>
-  <script src="data.js?v=os-notes-1" defer></script>
-  <script src="guides-cloud.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=compiler-only-1">
+  <!-- Answers are large, so they load in parallel and slot in after the questions render. Bump ?v= after editing. -->
+  <script id="answers-script" src="answers-compiler.js?v=cd-answers-2" async></script>
+  <script src="data.js?v=compiler-only-1" defer></script>
   <script src="model.js" defer></script>
   <script src="progress.js?v=module-checklist-1" defer></script>
-  <script src="app.js?v=perf-1" defer></script>
+  <script src="app.js?v=compiler-only-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#study">Skip to questions</a>
@@ -52,7 +21,7 @@
     <div class="header-inner">
       <a class="brand" href="./index.html" aria-label="Past Paper Atlas home">
         <span class="brand-mark"><img src="icon.svg" alt="" width="36" height="36"></span>
-        <span>Past Paper Atlas<span class="brand-caption">VIT · Fall 2026–27</span></span>
+        <span>Past Paper Atlas<span class="brand-caption">Compiler Design · VIT Fall 2026–27</span></span>
       </a>
       <button class="guide-button" id="show-guide" type="button">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8v1"/></svg>
@@ -62,16 +31,6 @@
   </header>
 
   <div class="layout">
-    <aside class="subject-rail">
-      <div class="rail-heading"><h2>Subjects</h2><span class="mono" id="subject-total"></span></div>
-      <nav class="subjects" id="subjects" aria-label="Subjects"></nav>
-      <div class="mobile-subject">
-        <label for="subject-select" class="small-label">Subject</label>
-        <select id="subject-select"></select>
-      </div>
-      <div class="rail-foot" id="rail-foot"></div>
-    </aside>
-
     <main id="study" tabindex="-1">
       <section class="module-header" aria-labelledby="module-title">
         <div class="module-head-inner">
@@ -79,21 +38,12 @@
           <h1 id="module-title">Past questions</h1>
           <p id="module-meta" class="module-meta"></p>
           <p id="progress-status" class="progress-status" role="status">Progress saved in this browser.</p>
-          <a id="ai-study-guide" class="guide-button" href="ai/" hidden>AI FAT Study Guide <span aria-hidden="true">↗</span></a>
-          <a id="db-study-guide" class="guide-button" href="db/" hidden>DBMS FAT Study Guide <span aria-hidden="true">↗</span></a>
           <div class="module-picker">
             <span class="small-label" id="modules-label">Browse modules</span>
             <nav id="modules" aria-labelledby="modules-label"></nav>
           </div>
         </div>
       </section>
-      <details id="fat-guide" class="fat-guide" hidden>
-        <summary>FAT guide</summary>
-        <div class="fat-guide-body">
-          <p class="fat-guide-note">Based on five archived FAT papers. Counts are by paper and include OR choices.</p>
-          <div id="fat-guide-content"></div>
-        </div>
-      </details>
       <details id="syllabus" class="syllabus">
         <summary><span>Topics in the current syllabus</span><span class="syllabus-caption">VTOP · Fall 2026–27</span></summary>
         <ul id="syllabus-topics"></ul>
@@ -119,9 +69,9 @@
     </div>
     <div class="guide-content">
       <p id="guide-coverage"></p>
-      <p>Module tags follow the Fall 2026–27 VTOP syllabi. A question can appear in multiple modules. Older questions without a clear match appear under <strong>Unmatched</strong> when available.</p>
+      <p>Module tags follow the Fall 2026–27 VTOP syllabus. A question can appear in multiple modules. Older questions without a clear match appear under <strong>Unmatched</strong> when available.</p>
       <p>Each card uses screenshots from the source paper. Select an image to enlarge it. When a matching answer key is available, open <strong>Solution from paper</strong> below the question.</p>
-      <p>OS questions use original answer-key screenshots where available. For questions without a key, <strong>Model answer · based on notes</strong> provides a worked answer grounded in the supplied OS notes, with page or slide references and any extra assumptions stated.</p>
+      <p><strong>Model answer · based on notes</strong> gives a worked answer grounded in the Compiler Design notes, with page references.</p>
       <h3>Estimated difficulty</h3>
       <dl>
         <div><dt>Easy</dt><dd>Recall, explain, or apply a familiar idea in one step.</dd></div>

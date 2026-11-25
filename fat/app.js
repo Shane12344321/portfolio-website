@@ -2,60 +2,33 @@
 
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
-// Filled per subject as its answer file arrives (see window.AtlasAnswers in index.html).
-const answersBySubject = {};
-const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
+// answers-compiler.js loads async, so questions can render before it arrives.
+let answers = window.ATLAS_COMPILER_ANSWERS;
 
 if (data?.subjects?.length && model) initialize();
 else $("#results").textContent = "The question index could not be loaded. Reopen the archive from its full folder.";
 
 function initialize() {
   let filters = model.selection(data, location.search);
-  const subjects = $("#subjects");
-  const subjectSelect = $("#subject-select");
+  const subject = data.subjects[0];
   const modules = $("#modules");
   const difficulty = $("#difficulty");
   const number = new Intl.NumberFormat("en-IN");
   const guide = $("#guide");
-  const fatGuide = $("#fat-guide");
-  const fatGuideContent = $("#fat-guide-content");
   const viewer = $("#scan-dialog");
   const largeScan = $("#large-scan");
   const zoom = $("#scan-zoom");
-  const aiStudyGuide = $("#ai-study-guide");
-  const dbStudyGuide = $("#db-study-guide");
-  let moduleSubject = null;
-  let activeFatGuide;
-  let moduleClickTimer;
-  let answerJumpPending = false;
   const questionsById = new Map(data.questions.map(item => [item.id, item]));
+  // Cards are built once and reused, so returning to a module keeps its decoded images.
+  const cards = new Map();
+  const prefetched = new Set();
+  let answerJumpPending = false;
   let storage;
   try { storage = window.localStorage; } catch { /* Progress remains available for this visit. */ }
   const progress = window.AtlasProgress.createProgress(data.questions, storage);
 
   const questionCount = (count, label = "question") => number.format(count) + " " + label + (count === 1 ? "" : "s");
-
-  for (const subject of data.subjects) {
-    const control = button("", "subject-button");
-    const text = el("span", "subject-name", subject.name);
-    text.append(el("span", "subject-code", subject.code));
-    const arrow = el("span", "subject-arrow", "↗");
-    arrow.setAttribute("aria-hidden", "true");
-    control.append(text, arrow);
-    control.dataset.value = subject.id;
-    control.addEventListener("click", () => changeSubject(subject.id));
-    // Fetch a subject's answers as soon as the pointer or focus suggests it is next.
-    const prefetch = () => window.AtlasAnswers?.load(subject.id);
-    control.addEventListener("pointerenter", prefetch, { once: true });
-    control.addEventListener("focus", prefetch, { once: true });
-    subjects.append(control);
-
-    const option = el("option", "", subject.name);
-    option.value = subject.id;
-    subjectSelect.append(option);
-  }
-  subjectSelect.addEventListener("change", () => changeSubject(subjectSelect.value));
 
   for (const level of model.DIFFICULTIES) {
     const control = button(level.label, "difficulty-button");
@@ -64,11 +37,32 @@ function initialize() {
     difficulty.append(control);
   }
 
+  const moduleOptions = [...subject.modules, { id: "all", name: "All modules" }];
+  if (data.questions.some(item => item.modules.includes(0))) moduleOptions.push({ id: 0, name: "Unmatched" });
+  for (const option of moduleOptions) {
+    const isModule = typeof option.id === "number" && option.id > 0;
+    const control = button("", "module-button");
+    control.append(el("span", "module-name", isModule ? "M" + option.id : option.name), el("span", "module-progress"));
+    control.dataset.value = option.id;
+    control.addEventListener("mousedown", event => {
+      if (event.detail > 1) event.preventDefault();
+    });
+    // Switch on the first click. A double-click also marks the module orange, a triple-click dark green.
+    control.addEventListener("click", event => {
+      setFilters({ ...filters, module: option.id });
+      if (event.detail >= 2) {
+        progress.markModule(subject.id, option.id, event.detail === 2 ? "orange" : "green");
+        renderProgress();
+      }
+    });
+    control.addEventListener("pointerenter", () => prefetchModule(option.id));
+    control.addEventListener("focus", () => prefetchModule(option.id));
+    modules.append(control);
+  }
+
   const paperCount = number.format(data.coverage.papers);
-  $("#subject-total").textContent = String(data.subjects.length).padStart(2, "0");
-  $("#rail-foot").textContent = questionCount(data.questions.length) + " · " + paperCount + " papers";
   $("#guide-coverage").textContent = questionCount(data.questions.length) + " from " + paperCount +
-    " papers across " + data.subjects.length + " subjects. Each separately indexed subpart or option counts once.";
+    " papers. Each separately indexed subpart or option counts once.";
   for (const note of data.coverage.notes) $("#coverage-notes").append(el("p", "fine-print", note));
   $("#show-guide").addEventListener("click", () => guide.showModal());
   zoom.addEventListener("click", () => {
@@ -79,7 +73,6 @@ function initialize() {
   });
 
   window.addEventListener("popstate", () => {
-    clearTimeout(moduleClickTimer);
     filters = model.selection(data, location.search);
     render();
     jumpToQuestion();
@@ -88,9 +81,20 @@ function initialize() {
     const prefixes = [window.AtlasProgress.STORAGE_PREFIX, window.AtlasProgress.MODULE_MARK_PREFIX];
     if (event.storageArea !== storage || (event.key !== null && !prefixes.some(prefix => event.key.startsWith(prefix)))) return;
     progress.reload();
-    for (const article of document.querySelectorAll("#results .question")) updateQuestionProgress(article);
+    for (const article of cards.values()) updateQuestionProgress(article);
     renderProgress();
   });
+  if (!answers) {
+    $("#answers-script")?.addEventListener("load", () => {
+      answers = window.ATLAS_COMPILER_ANSWERS;
+      if (!answers) return;
+      for (const [id, article] of cards) attachAnswer(article, questionsById.get(id));
+      if (answerJumpPending) {
+        answerJumpPending = false;
+        jumpToQuestion();
+      }
+    }, { once: true });
+  }
   render();
   jumpToQuestion();
 
@@ -99,7 +103,7 @@ function initialize() {
     const question = document.getElementById(location.hash.slice(1));
     if (!question) return;
     const openAnswer = new URLSearchParams(location.search).get("answer") === "1";
-    if (openAnswer && !(filters.subject in answersBySubject)) answerJumpPending = true;
+    if (openAnswer && !answers) answerJumpPending = true;
     const answer = openAnswer && question.querySelector(".model-answer");
     if (answer) {
       question.querySelector(".question-body").hidden = false;
@@ -109,18 +113,10 @@ function initialize() {
     requestAnimationFrame(() => (answer || question).scrollIntoView());
   }
 
-  function changeSubject(id) {
-    if (id === filters.subject) return;
-    const subject = data.subjects.find(item => item.id === id);
-    setFilters({ ...filters, subject: id, module: subject.modules[0].id });
-    if (window.scrollY > $("#study").offsetTop) window.scrollTo(0, 0);
-  }
-
   function setFilters(next) {
-    clearTimeout(moduleClickTimer);
     if (Object.keys(next).every(key => next[key] === filters[key])) return;
     const query = new URLSearchParams({
-      subject: next.subject,
+      subject: subject.id,
       module: String(next.module),
       difficulty: next.difficulty,
     });
@@ -129,62 +125,32 @@ function initialize() {
     render();
   }
 
+  // Warm the first few scans of a module the pointer or focus is heading to.
+  function prefetchModule(id) {
+    if (prefetched.has(id)) return;
+    prefetched.add(id);
+    const items = model.groupQuestions(data, { ...filters, module: id }).flatMap(group => group.items);
+    for (const item of items.slice(0, 4)) {
+      if (cards.has(item.id) || !item.scans[0]) continue;
+      const image = new Image();
+      image.decoding = "async";
+      image.src = item.scans[0].src;
+    }
+  }
+
   function render() {
-    const subject = data.subjects.find(item => item.id === filters.subject);
-    const courseQuestions = data.questions.filter(item => item.subject === subject.id);
     const module = subject.modules.find(item => item.id === filters.module);
     const groups = model.groupQuestions(data, filters);
     const total = groups.reduce((sum, group) => sum + group.items.length, 0);
 
-    updatePressed(subjects, subject.id);
-    subjectSelect.value = subject.id;
     updatePressed(difficulty, filters.difficulty);
-
-    if (moduleSubject !== subject.id) {
-      const options = [
-        ...subject.modules,
-        { id: "all", name: "All modules" },
-      ];
-      if (courseQuestions.some(item => item.modules.includes(0))) options.push({ id: 0, name: "Unmatched" });
-      modules.replaceChildren(...options.map(option => {
-        const isModule = typeof option.id === "number" && option.id > 0;
-        const control = button("", "module-button");
-        control.append(el("span", "module-name", isModule ? "M" + option.id : option.name), el("span", "module-progress"));
-        control.dataset.value = option.id;
-        control.addEventListener("mousedown", event => {
-          if (event.detail > 1) event.preventDefault();
-        });
-        control.addEventListener("click", event => {
-          clearTimeout(moduleClickTimer);
-          if (event.detail >= 2) {
-            progress.markModule(subject.id, option.id, event.detail === 2 ? "orange" : "green");
-            renderProgress();
-          } else {
-            const next = { ...filters, module: option.id };
-            if (event.detail === 0) setFilters(next);
-            else moduleClickTimer = setTimeout(() => setFilters(next), 550);
-          }
-        });
-        return control;
-      }));
-      moduleSubject = subject.id;
-    }
     updatePressed(modules, String(filters.module));
 
     $("#course-label").textContent = [subject.code, subject.name, module && "Module " + module.id].filter(Boolean).join(" / ");
     $("#module-title").textContent = module?.name ?? (filters.module === 0 ? "Unmatched questions" : "All modules");
-    aiStudyGuide.hidden = subject.id !== "ai";
-    const guidePath = location.protocol === "file:" ? "ai/index.html" : "ai/";
-    aiStudyGuide.href = guidePath + (module ? "?module=" + module.id : "");
-    if (dbStudyGuide) {
-      dbStudyGuide.hidden = subject.id !== "dbms";
-      const dbGuidePath = location.protocol === "file:" ? "db/index.html" : "db/";
-      dbStudyGuide.href = dbGuidePath + (module ? "#module-" + module.id : "");
-    }
     const syllabus = $("#syllabus");
     syllabus.hidden = !module;
     $("#syllabus-topics").replaceChildren(...(module?.topics ?? []).map(topic => el("li", "", topic)));
-    renderFatGuide(subject.id === "cloud" ? cloudGuides?.[module?.id] : undefined);
     $("#result-count").textContent = questionCount(total) + " shown";
 
     const content = [];
@@ -201,9 +167,9 @@ function initialize() {
       heading.append(h2, el("p", "", descriptor.name), el("span", "exam-count", number.format(items.length)));
       section.append(heading);
       if (items.length) {
-        section.append(...items.map(item => questionCard(item, descriptor.label)));
+        section.append(...items.map(item => card(item, descriptor.label)));
       } else {
-        const hasOtherLevels = courseQuestions.some(item => item.exam === exam &&
+        const hasOtherLevels = data.questions.some(item => item.exam === exam &&
           (filters.module === "all" || item.modules.includes(filters.module)));
         const empty = el("p", "empty", hasOtherLevels ? "No questions at this difficulty." : "No questions indexed for this selection.");
         if (hasOtherLevels && filters.difficulty !== "all") {
@@ -229,35 +195,19 @@ function initialize() {
     $("#exam-jumps").replaceChildren(...jumps);
     $("#results").replaceChildren(...content);
     renderProgress();
-    if (!(subject.id in answersBySubject)) requestAnswers(subject.id);
   }
 
-  // Cards render straight away; model answers slot in once the subject's file has loaded.
-  function requestAnswers(id) {
-    window.AtlasAnswers?.load(id).then(answers => {
-      if (!answers || id in answersBySubject) return;
-      answersBySubject[id] = answers;
-      if (filters.subject !== id) return;
-      for (const article of document.querySelectorAll("#results .question")) {
-        const item = questionsById.get(article.dataset.questionId);
-        if (item) attachAnswer(article, item);
-      }
-      if (answerJumpPending) {
-        answerJumpPending = false;
-        jumpToQuestion();
-      }
-    });
-  }
-
-  function attachAnswer(article, item) {
-    if (article.querySelector(".model-answer")) return;
-    const showAnswer = item.subject !== "os" || !item.solutions.length;
-    const answer = showAnswer ? answersBySubject[item.subject]?.[item.id] : undefined;
-    if (answer) article.querySelector(".solution").before(modelAnswer(answer));
+  function card(item, examLabel) {
+    let article = cards.get(item.id);
+    if (article) updateQuestionProgress(article);
+    else {
+      article = questionCard(item, examLabel);
+      cards.set(item.id, article);
+    }
+    return article;
   }
 
   function renderProgress() {
-    const subject = data.subjects.find(item => item.id === filters.subject);
     for (const control of modules.children) {
       const id = control.dataset.value === "all" ? "all" : Number(control.dataset.value);
       const count = progress.summary(subject.id, id);
@@ -300,19 +250,9 @@ function initialize() {
     collapse.setAttribute("aria-controls", body.id);
   }
 
-  function renderFatGuide(nextGuide) {
-    if (nextGuide === activeFatGuide) return;
-    activeFatGuide = nextGuide;
-    fatGuide.open = false;
-    fatGuide.hidden = !nextGuide;
-    fatGuideContent.replaceChildren();
-    if (nextGuide) {
-      fatGuideContent.append(bulletSections([
-        ["Common FAT question patterns", nextGuide.patterns],
-        ["What to learn", nextGuide.learn],
-        ["What to write", nextGuide.write],
-      ], "h2"));
-    }
+  function attachAnswer(article, item) {
+    const answer = answers?.[item.id];
+    if (answer && !article.querySelector(".model-answer")) article.querySelector(".solution").before(modelAnswer(answer));
   }
 
   function questionCard(item, examLabel) {
