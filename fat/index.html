@@ -7,18 +7,44 @@
   <meta name="theme-color" content="#f5f5ee">
   <title>Past Paper Atlas</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=cd-answers-1">
+  <link rel="stylesheet" href="style.css?v=perf-1">
+  <script>
+    // Model answers are large, so each subject's file loads on demand instead of all six up front.
+    // Bump a file's ?v= here after editing it.
+    window.AtlasAnswers = (function () {
+      var files = {
+        ai: ["answers-ai.js?v=ai-answers-1", "ATLAS_AI_ANSWERS"],
+        cloud: ["answers-cloud.js?v=cloud-answers-1", "ATLAS_CLOUD_ANSWERS"],
+        os: ["answers-os.js?v=os-notes-1", "ATLAS_OS_ANSWERS"],
+        dbms: ["answers-dbms.js?v=dbms-answers-1", "ATLAS_DBMS_ANSWERS"],
+        networks: ["answers-networks.js?v=cn-answers-1", "ATLAS_NETWORKS_ANSWERS"],
+        compiler: ["answers-compiler.js?v=cd-answers-2", "ATLAS_COMPILER_ANSWERS"]
+      };
+      var pending = {};
+      function load(subject) {
+        var file = files[subject];
+        if (!file) return Promise.resolve(undefined);
+        if (!pending[subject]) pending[subject] = new Promise(function (resolve) {
+          var script = document.createElement("script");
+          script.src = file[0];
+          script.async = true;
+          script.onload = function () { resolve(window[file[1]]); };
+          script.onerror = function () { delete pending[subject]; resolve(undefined); };
+          document.head.appendChild(script);
+        });
+        return pending[subject];
+      }
+      // Start the current subject's answers now, alongside the question index.
+      var subject = new URLSearchParams(location.search).get("subject");
+      load(files[subject] ? subject : "ai");
+      return { load: load };
+    })();
+  </script>
   <script src="data.js?v=os-notes-1" defer></script>
-  <script src="answers-cloud.js" defer></script>
-  <script src="answers-os.js?v=os-notes-1" defer></script>
-  <script src="answers-ai.js?v=ai-answers-1" defer></script>
-  <script src="answers-dbms.js?v=dbms-answers-1" defer></script>
-  <script src="answers-networks.js?v=cn-answers-1" defer></script>
-  <script src="answers-compiler.js?v=cd-answers-2" defer></script>
   <script src="guides-cloud.js" defer></script>
   <script src="model.js" defer></script>
   <script src="progress.js?v=module-checklist-1" defer></script>
-  <script src="app.js?v=cd-answers-1" defer></script>
+  <script src="app.js?v=perf-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#study">Skip to questions</a>

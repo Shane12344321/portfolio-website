@@ -2,14 +2,8 @@
 
 const $ = selector => document.querySelector(selector);
 const data = window.ATLAS_DATA;
-const answersBySubject = {
-  ai: window.ATLAS_AI_ANSWERS,
-  cloud: window.ATLAS_CLOUD_ANSWERS,
-  os: window.ATLAS_OS_ANSWERS,
-  dbms: window.ATLAS_DBMS_ANSWERS,
-  networks: window.ATLAS_NETWORKS_ANSWERS,
-  compiler: window.ATLAS_COMPILER_ANSWERS,
-};
+// Filled per subject as its answer file arrives (see window.AtlasAnswers in index.html).
+const answersBySubject = {};
 const cloudGuides = window.ATLAS_CLOUD_GUIDES;
 const model = window.AtlasModel;
 
@@ -34,6 +28,8 @@ function initialize() {
   let moduleSubject = null;
   let activeFatGuide;
   let moduleClickTimer;
+  let answerJumpPending = false;
+  const questionsById = new Map(data.questions.map(item => [item.id, item]));
   let storage;
   try { storage = window.localStorage; } catch { /* Progress remains available for this visit. */ }
   const progress = window.AtlasProgress.createProgress(data.questions, storage);
@@ -49,6 +45,10 @@ function initialize() {
     control.append(text, arrow);
     control.dataset.value = subject.id;
     control.addEventListener("click", () => changeSubject(subject.id));
+    // Fetch a subject's answers as soon as the pointer or focus suggests it is next.
+    const prefetch = () => window.AtlasAnswers?.load(subject.id);
+    control.addEventListener("pointerenter", prefetch, { once: true });
+    control.addEventListener("focus", prefetch, { once: true });
     subjects.append(control);
 
     const option = el("option", "", subject.name);
@@ -99,6 +99,7 @@ function initialize() {
     const question = document.getElementById(location.hash.slice(1));
     if (!question) return;
     const openAnswer = new URLSearchParams(location.search).get("answer") === "1";
+    if (openAnswer && !(filters.subject in answersBySubject)) answerJumpPending = true;
     const answer = openAnswer && question.querySelector(".model-answer");
     if (answer) {
       question.querySelector(".question-body").hidden = false;
@@ -228,6 +229,31 @@ function initialize() {
     $("#exam-jumps").replaceChildren(...jumps);
     $("#results").replaceChildren(...content);
     renderProgress();
+    if (!(subject.id in answersBySubject)) requestAnswers(subject.id);
+  }
+
+  // Cards render straight away; model answers slot in once the subject's file has loaded.
+  function requestAnswers(id) {
+    window.AtlasAnswers?.load(id).then(answers => {
+      if (!answers || id in answersBySubject) return;
+      answersBySubject[id] = answers;
+      if (filters.subject !== id) return;
+      for (const article of document.querySelectorAll("#results .question")) {
+        const item = questionsById.get(article.dataset.questionId);
+        if (item) attachAnswer(article, item);
+      }
+      if (answerJumpPending) {
+        answerJumpPending = false;
+        jumpToQuestion();
+      }
+    });
+  }
+
+  function attachAnswer(article, item) {
+    if (article.querySelector(".model-answer")) return;
+    const showAnswer = item.subject !== "os" || !item.solutions.length;
+    const answer = showAnswer ? answersBySubject[item.subject]?.[item.id] : undefined;
+    if (answer) article.querySelector(".solution").before(modelAnswer(answer));
   }
 
   function renderProgress() {
@@ -319,11 +345,7 @@ function initialize() {
       note.textContent = item.note;
       note.hidden = false;
     }
-    const showAnswer = item.subject !== "os" || !item.solutions.length;
-    const answer = showAnswer ? answersBySubject[item.subject]?.[item.id] : undefined;
-    if (answer) {
-      article.querySelector(".solution").before(modelAnswer(answer));
-    }
+    attachAnswer(article, item);
     if (item.solutions.length) {
       const solution = article.querySelector(".solution");
       solution.hidden = false;
@@ -377,17 +399,22 @@ function initialize() {
 function modelAnswer(answer) {
   const details = el("details", "model-answer");
   details.append(el("summary", "", answer.sources?.length ? "Model answer · based on notes" : "Model answer"));
-  const body = el("div", "model-answer-body");
-  const sections = answer.sections ?? [
-    ["Direct answer", answer.answer],
-    ["Key points", answer.points],
-    ["Diagram or example", answer.example],
-  ];
-  body.append(bulletSections([
-    ...sections.filter(([, items]) => items?.length),
-    ...(answer.sources?.length ? [["Notes and references", answer.sources]] : []),
-  ], "h4"));
-  details.append(body);
+  // Build the body (tables, SVG diagrams, figures) only when the answer is first opened.
+  details.addEventListener("toggle", function build() {
+    if (!details.open) return;
+    details.removeEventListener("toggle", build);
+    const body = el("div", "model-answer-body");
+    const sections = answer.sections ?? [
+      ["Direct answer", answer.answer],
+      ["Key points", answer.points],
+      ["Diagram or example", answer.example],
+    ];
+    body.append(bulletSections([
+      ...sections.filter(([, items]) => items?.length),
+      ...(answer.sources?.length ? [["Notes and references", answer.sources]] : []),
+    ], "h4"));
+    details.append(body);
+  });
   return details;
 }
 

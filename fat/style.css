@@ -103,7 +103,8 @@ summary { cursor: pointer; }
 .exam-count { margin-left: auto; background: #e6eadf; color: var(--ink); border-radius: 6px; padding: 2px 7px; font: 650 .7rem var(--mono); }
 .empty { padding: 13px 15px; border: 1px dashed var(--line-dark); border-radius: 10px; color: var(--muted); font-size: .87rem; margin: 0; }
 .empty button { margin-left: 7px; }
-.question { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 13px; }
+.question { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; padding: 13px; content-visibility: auto; contain-intrinsic-size: auto 420px; }
+.question.is-collapsed { contain-intrinsic-size: auto 64px; }
 .question.is-done { border-color: #525252; background: #eeeeeb; filter: grayscale(1); opacity: .8; }
 .question.is-done .question-scans .scan-preview { border-color: #525252; }
 .question-head { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin: 0 1px 11px; }
